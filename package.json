@@ -1,0 +1,24 @@
+{
+  "name": "quicktext-logger",
+  "version": "0.0.1",
+  "description": "An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage).",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "log",
+    "quicktext"
+  ],
+  "author": "Imen Ammar <imen.ammar@satoripop.tn>",
+  "license": "MIT",
+  "dependencies": {
+    "app-module-path": "2.2.0",
+    "chalk": "2.3.0",
+    "lodash": "4.17.4",
+    "moment": "2.19.2",
+    "mongoose": "4.13.3",
+    "winston": "3.0.0-rc1"
+  }
+}
