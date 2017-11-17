@@ -1,0 +1,1 @@
+quicktext-logger
