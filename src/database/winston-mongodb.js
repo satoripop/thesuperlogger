@@ -206,8 +206,11 @@ MongoDB.prototype.log = function(info, cb) {
       delete info.meta.source;
     }
     let message = util.format(info.message, ...info.splat);
+
     entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
-    entry.content = JSON.stringify(' ' + helpers.prepareMetaData(info.meta));
+    entry.content += ' ';
+    entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
+
     if (this.storeHost) {
       entry.hostname = this.hostname;
     }
