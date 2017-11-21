@@ -14,4 +14,4 @@ logger.init({
   }
 });
 let string = "hey " + ansi.grey("you") + " %s!";
-logger.error(string, "yutut", {x: 2, y: {c: 5}});
+logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
