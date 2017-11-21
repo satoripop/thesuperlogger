@@ -8,7 +8,7 @@
 // winston helpers
 const { createLogger, format, transports, addColors, add } = require('winston');
 const { combine, prettyPrint, colorize} = format;
-const winstonMongo = require('../../winston-mongodb/lib/winston-mongodb').MongoDB;
+const winstonMongo = require('database/winston-mongodb').MongoDB;
 // dependency modules
 const ansi = require('chalk');
 const moment = require('moment');
