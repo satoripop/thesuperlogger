@@ -11,6 +11,7 @@ const mongodb = require('mongodb');
 const winston = require('winston');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const Stream = require('stream').Stream;
+const logTypes = require('database/logTypes');
 const helpers = require('./helpers');
 
 
@@ -183,6 +184,8 @@ MongoDB.prototype.log = function(info, cb) {
   if(!info.meta.logblock){
     throw new Error('Each log should be part of a logblock.');
   }
+  info.meta.type = info.meta.type || logTypes.BASE;
+
   // Avoid reentrancy that can be not assumed by database code.
   // If database logs, better not to call database itself in the same call.
   process.nextTick(()=>{
