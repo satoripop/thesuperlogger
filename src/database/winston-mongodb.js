@@ -184,7 +184,7 @@ MongoDB.prototype.log = function(info, cb) {
   if(!info.meta.logblock){
     throw new Error('Each log should be part of a logblock.');
   }
-  info.meta.type = info.meta.type || logTypes.BASE;
+  let type = info.meta.type || logTypes.BASE;
 
   // Avoid reentrancy that can be not assumed by database code.
   // If database logs, better not to call database itself in the same call.
@@ -198,6 +198,7 @@ MongoDB.prototype.log = function(info, cb) {
       level: info[LEVEL],
       context: info.meta.context,
       logblock: info.meta.logblock,
+      type
     };
     delete info.meta.context;
     delete info.meta.logblock;
