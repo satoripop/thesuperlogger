@@ -162,8 +162,7 @@ MongoDB.prototype.close = function() {
     return;
   }
   this.logDb.close().then(()=>this.logDb = null).catch(err=>{
-    console.error('Winston MongoDB transport encountered on error during '
-        + 'closing.', err);
+    console.error('Winston MongoDB transport encountered on error during closing.', err);
   });
 };
 
@@ -207,10 +206,23 @@ MongoDB.prototype.log = function(info, cb) {
       delete info.meta.source;
     }
     let message = util.format(info.message, ...info.splat);
+    switch(type){
+      case logTypes.BASE:
+      case logTypes.REST_SERVER:
+        entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
+        entry.content += ' ';
+        entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
+        break;
+      case logTypes.REST_CLIENT:
+        break;
+      case logTypes.WS:
+        break;
+      default:
+        entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
+        entry.content += ' ';
+        entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
+    }
 
-    entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
-    entry.content += ' ';
-    entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
 
     if (this.storeHost) {
       entry.hostname = this.hostname;

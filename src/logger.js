@@ -9,6 +9,7 @@
 const { createLogger, format, transports, addColors, add } = require('winston');
 const { combine, prettyPrint, colorize} = format;
 const winstonMongo = require('database/winston-mongodb').MongoDB;
+const logTypes = require('database/logTypes');
 // dependency modules
 const ansi = require('chalk');
 const moment = require('moment');
@@ -74,35 +75,60 @@ class Logger {
     let level = this.levelFromStatus();
     const self = this;
     return (req, res, next) => {
-      let coloredRes = {},
-        currentUrl = req.originalUrl || req.url,
-        startTime = new Date();
-      // Manage to get information from the response too, just like Connect.logger does:
+      let currentUrl = req.originalUrl || req.url,
+        startTime = new Date(),
+        tmp = startTime.getTime();
+      let logblock = `${req.url}-${req.method}-${tmp}`;
+      let logMeta = {
+        context: "EXPRESS",
+        type: logTypes.REST_SERVER,
+        logblock
+      };
+      //log on call
+      self.logger.info("EXPRESS CALL %s: %s", currentUrl, req.method, logMeta);
+
+      //log params
+      if(!_.isEmpty(req.params)){
+        let logMetaParams = Object.assign({}, logMeta, req.params);
+        self.logger.info("Params: ", logMetaParams);
+      }
+
+
+      //log query
+      if(!_.isEmpty(req.query)){
+        let logMetaQuery = Object.assign({}, logMeta, req.query);
+        self.logger.info("Query: ", logMetaQuery);
+      }
+
+      //log body
+      if(!_.isEmpty(req.body)){
+        let logMetaBody = Object.assign({}, logMeta, req.body);
+        self.logger.info("Body Request: ", logMetaBody);
+      }else{
+        self.logger.info("Body Request is empty ", logMeta);
+      }
+
       let end = res.end;
       res.end = function (chunk, encoding) {
+        //log response status and delay
         res.responseTime = (new Date()) - startTime;
         res.end = end;
         res.end(chunk, encoding);
         req.url = req.originalUrl || req.url;
-        // Palette from https://github.com/expressjs/morgan/blob/master/index.js#L205
         let statusColor = 'green';
         if (res.statusCode >= 500) statusColor = 'red';
         else if (res.statusCode >= 400) statusColor = 'yellow';
         else if (res.statusCode >= 300) statusColor = 'cyan';
-        let expressMsgFormat = ansi.grey("{{req.method}} {{req.url}}") +
-          " {{res.statusCode}} " +
-          ansi.grey("{{res.responseTime}}ms");
-        coloredRes.statusCode = ansi[statusColor](res.statusCode);
-        var msgFormat = expressMsgFormat;
-        // Using mustache style templating
-        var template = _.template(msgFormat, {
-          interpolate: /\{\{(.+?)\}\}/g
-        });
-        var msg = template({
-          req: req,
-          res: _.assign({}, res, coloredRes)
-        });
+        let msg = ansi.grey(`${req.method} ${req.url}`) +
+          ansi[statusColor](` ${res.statusCode} `) +
+          ansi.grey(`${res.responseTime}ms`);
         self.logger.log(level(req, res), msg);
+
+        //log response body
+        if(!_.isEmpty(res.body)){
+          let logMetaResponseBody = Object.assign({}, logMeta, res.body);
+          self.logger.info("Response Body: ", logMetaResponseBody);
+        }
       };
       next();
     };

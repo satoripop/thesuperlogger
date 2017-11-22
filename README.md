@@ -33,17 +33,6 @@ These are the levels you can state [here](### Levels and console colors).
 Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels. 
 
 ## Docs
-### Levels and console colors:
-The levels of Super Logger are:
-- debug (green on Console)
-- info (blue on Console)
-- notice (grey on Console)
-- warning (yellow on Console)
-- error (red on Console)
-- critical (red on Console)
-- alert (red on Console)
-- emergency (red on Console)
-
 ### Init Logger
 Create a new instance and pass the database options to the init methode. The db property is required.
 Logger is a singleton class. The init method should be called only once on your whole project. Preferably in your entry file (index.js or whatever you named it).
@@ -66,7 +55,25 @@ To reuse the logger on different files, you just need to call the logger as foll
 const Logger = require('super-logger');
 logger = new Logger();
 ```
-### How to log:
+### Levels and console colors:
+The levels of Super Logger are:
+- debug (green on Console)
+- info (blue on Console)
+- notice (grey on Console)
+- warning (yellow on Console)
+- error (red on Console)
+- critical (red on Console)
+- alert (red on Console)
+- emergency (red on Console)
+
+### Log types:
+We have a specific kind of logging for each of these types:
+- [BASE](### Base log): 0 -> basic logging
+- [REST_SERVER](### Express logging): 1 -> morgan like logging but cooler
+- REST_CLIENT: 2 -> requests logging
+- WS: 3 -> ws event calls logging
+
+### Base log:
 Depending on the level you want to use you just need to call the level method name.
 Each log has a context and is part of a logblock. Thus these fields are mandatory.
 The source field is not required.
@@ -82,3 +89,27 @@ Object.assign(objectError, {
 logger.error(textError, value, objectError);
 //error: hello world ! {x: 2}
 ```
+
+### Express logging
+Add the middleware of super-logger to your express api to get our cool well detailed logging.
+```
+let app = express();
+app.use(logger.expressLogging());
+```
+On each call on your express api you'll have a block of log with the following settings:
+- logblock: [{url}-{method}-{timestamp}] 
+- context: *EXPRESS*
+- type: 1 (REST_SERVER = 1, click [here](### Log types)) 
+
+The log block will contain the following logs:
+- A log to inform you when the route was called (level info)
+- A log with the params if they exist (level info)
+- A log with the query if it exists (level info)
+- A log with the body request (level info)
+- A log when the response in send with the status code and delay on ms (level depending on status code)
+- A log with the response body if it exists (level info).
+
+For each status code we have a different level:
+- status code >= 100 -> debug
+- status code >= 400 -> warning
+- status code >= 500) -> error
