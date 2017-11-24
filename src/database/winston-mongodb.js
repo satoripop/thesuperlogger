@@ -173,17 +173,26 @@ MongoDB.prototype.close = function() {
  * @param {Function} cb Continuation to respond to when complete.
  */
 MongoDB.prototype.log = function(info, cb) {
+  let meta;
+  if (info.splat) {
+    meta = Object.assign({}, info.meta);
+  } else {
+    meta = Object.assign({}, info);
+    delete meta.message;
+    delete meta.level;
+  }
+
   if (!this.logDb) {
     this._opQueue.push({method: 'log', args: arguments});
     return;
   }
-  if(!info.meta.context){
+  if(!meta.context){
     throw new Error('Each log should have a context.');
   }
-  if(!info.meta.logblock){
+  if(!meta.logblock){
     throw new Error('Each log should be part of a logblock.');
   }
-  let type = info.meta.type || logTypes.BASE;
+  let type = meta.type || logTypes.BASE;
 
   // Avoid reentrancy that can be not assumed by database code.
   // If database logs, better not to call database itself in the same call.
@@ -195,35 +204,21 @@ MongoDB.prototype.log = function(info, cb) {
     let entry = {
       timestamp: new Date(),
       level: info[LEVEL],
-      context: info.meta.context,
-      logblock: info.meta.logblock,
+      context: meta.context,
+      logblock: meta.logblock,
       type
     };
-    delete info.meta.context;
-    delete info.meta.logblock;
-    if(info.meta.source){
-      entry.source = info.meta.source;
-      delete info.meta.source;
+    delete meta.context;
+    delete meta.logblock;
+    delete meta.type;
+    if(meta.source){
+      entry.source = meta.source;
+      delete meta.source;
     }
-    let message = util.format(info.message, ...info.splat);
-    switch(type){
-      case logTypes.BASE:
-      case logTypes.REST_SERVER:
-        entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
-        entry.content += ' ';
-        entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
-        break;
-      case logTypes.REST_CLIENT:
-        break;
-      case logTypes.WS:
-        break;
-      default:
-        entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
-        entry.content += ' ';
-        entry.content += JSON.stringify(helpers.prepareMetaData(info.meta));
-    }
-
-
+    let message = info.splat ? util.format(info.message, ...info.splat): info.message;
+    entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
+    entry.content += ' ';
+    entry.content += JSON.stringify(helpers.prepareMetaData(meta));
     if (this.storeHost) {
       entry.hostname = this.hostname;
     }

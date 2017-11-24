@@ -70,7 +70,7 @@ The levels of Super Logger are:
 We have a specific kind of logging for each of these types:
 - [BASE](### Base log): 0 -> basic logging
 - [REST_SERVER](### Express logging): 1 -> morgan like logging but cooler
-- REST_CLIENT: 2 -> requests logging
+- [REST_CLIENT](### Request logging): 2 -> requests logging
 - WS: 3 -> ws event calls logging
 
 ### Base log:
@@ -113,3 +113,42 @@ For each status code we have a different level:
 - status code >= 100 -> debug
 - status code >= 400 -> warning
 - status code >= 500) -> error
+
+### Request logging:
+Whenever you make a request to an API or route you can log its:
+- url, methode, query, body sent with the [*callRequestLogging*](#### callRequestLogging) method.
+- status, body, error received with the [*endRequestLogging*](#### endRequestLogging) method.
+
+If the body response is an object, array or string it will be saved in your log content.
+
+If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.
+
+#### callRequestLogging
+```
+callRequestLogging(url, method, form, api)
+```
+- url : path called (string) -> required
+- method: method used (string) -> required
+- form: body sent (object)
+- api: to differentiate your API requests and get in you log content "API Request" instead of "Request", set to true. (boolean - default true)
+
+### endRequestLogging
+```
+endRequestLogging(url, method, err, httpResponse, body, api, json )
+```
+- url : path called (string) -> required
+- method: method used (string) -> required
+- err: error on request (object or string)
+- httpResponse: response with *statusCode* (object)
+- api: to differentiate your API response and get in you log content "API Response" instead of "Response", set to true. (boolean - default true)
+- json: if you expect a json response, set to true (boolean - default false)
+
+
+```
+const request = require('request');
+let url = "http://ip.jsontest.com/ ";
+logger.callRequestLogging(url, 'GET', {}, true);
+request.get(url, (err, httpResponse, body) => {
+  logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+});
+```
