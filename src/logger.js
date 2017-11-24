@@ -163,9 +163,9 @@ class Logger {
    * Log on a call request:
    * log instantly the called route with its params, query, body and method.
    * @param  {string}  url        url called
-   * @param  {[type]}  method     method used
-   * @param  {[type]}  form       body sent to request
-   * @param  {Boolean} [api=true] is the url called part of a private API
+   * @param  {string}  method     method used
+   * @param  {object}  form       body sent to request
+   * @param  {boolean} [api=true] is the url called part of a private API
    */
   callRequestLogging(url, method, form, api = true){
     if(!url || !method){
@@ -212,6 +212,13 @@ class Logger {
 
   /**
    * Log a request call response:
+   * log after request the error, status and body response
+   * @param  {string}  method       method used
+   * @param  {object}  err          error on request
+   * @param  {object}  httpResponse httpResponse
+   * @param  {object}  body         body Response
+   * @param  {boolean} [api=true]   is the url called part of a private API
+   * @param  {boolean} [json=false] is the body response a json
    */
   endRequestLogging(url, method, err, httpResponse, body, api = true, json = false){
     if(!url || !method){
