@@ -34,7 +34,7 @@ Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *deb
 
 ## Docs
 ### Init Logger
-Create a new instance and pass the database options to the init methode. The db property is required.
+Create a new instance and pass the database options to the init methode. The db and logDir properties are required.
 Logger is a singleton class. The init method should be called only once on your whole project. Preferably in your entry file (index.js or whatever you named it).
 
 ```
@@ -42,6 +42,7 @@ const Logger = require('super-logger');
 logger = new Logger();
 logger.init({
   db: "mongodb://localhost/my_database",
+  logDir: './logs',
   username: "my_username",
   password: "my_password",
   options: {
