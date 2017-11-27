@@ -104,7 +104,7 @@ let app = express();
 app.use(logger.expressLogging());
 ```
 On each call on your express api you'll have a block of log with the following settings:
-- logblock: [{url}-{method}-{timestamp}] 
+- logblock: [{url}-{method}-{uid}] 
 - context: *EXPRESS*
 - type: 1 (REST_SERVER = 1, click [here](### Log types)) 
 
