@@ -132,7 +132,7 @@ callRequestLogging(url, method, form, api)
 - form: body sent (object)
 - api: to differentiate your API requests and get in you log content "API Request" instead of "Request", set to true. (boolean - default true)
 
-### endRequestLogging
+#### endRequestLogging
 ```
 endRequestLogging(url, method, err, httpResponse, body, api, json )
 ```
@@ -152,3 +152,20 @@ request.get(url, (err, httpResponse, body) => {
   logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
 });
 ```
+### Websocket logging
+Our module works with socket.io. On each web socket call, we log the event name and the data passed. 
+
+To init the web socket logging, do as following:
+```
+io = require('socket.io')(3000);
+logger.wsLogging(io);
+io.on('connection', (socket) => {
+  socket.on('test', data => {
+    // event handling
+  });
+});
+```
+You'll have a block of log with the following settings:
+- logblock: [{eventName}-{uid}] 
+- context: *WEBSOCKET*
+- type: 3 (WS = 3, click [here](### Log types)) 
