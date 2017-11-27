@@ -72,7 +72,13 @@ We have a specific kind of logging for each of these types:
 - [BASE](### Base log): 0 -> basic logging
 - [REST_SERVER](### Express logging): 1 -> morgan like logging but cooler
 - [REST_CLIENT](### Request logging): 2 -> requests logging
-- WS: 3 -> ws event calls logging
+- [WS](### Websocket logging): 3 -> ws event calls logging
+
+### Pre-existing context:
+We use these context. But you can add your own as you please:
+- REQUEST: for logs on api or url requests
+- EXPRESS: for logs on express route calls
+- WEBSOCKET: for logs on websocket (socket.io) event calls
 
 ### Base log:
 Depending on the level you want to use you just need to call the level method name.
@@ -123,6 +129,11 @@ Whenever you make a request to an API or route you can log its:
 If the body response is an object, array or string it will be saved in your log content.
 
 If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.
+
+You'll have a block of log with the following settings:
+- logblock: [{url}-{method}-{uid}] 
+- context: *REQUEST*
+- type: 2 (REST_CLIENT = 2, click [here](### Log types)) 
 
 #### callRequestLogging
 ```
