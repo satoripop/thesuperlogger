@@ -16,8 +16,9 @@ logger.init({
     autoReconnect: false
   }
 });
-// let string = "hey " + ansi.grey("you") + " %s!";
-// logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
+
+let string = "hey " + ansi.grey("you") + " %s!";
+logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
 
 let app = express();
 app.use(logger.expressLogging());
@@ -31,4 +32,11 @@ let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";
 logger.callRequestLogging(url, 'get', {}, true);
 request.get(url, (err, httpResponse, body) => {
   logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+});
+
+io = require('socket.io')(3000);
+logger.wsLogging(io);
+io.on('connection', (socket) => {
+  socket.on('test', data => {
+  });
 });

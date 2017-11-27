@@ -282,6 +282,35 @@ class Logger {
       }
     }
   }
+
+  /**
+   * [logWS description]
+   * @param  {object} io the io socket object
+   */
+  wsLogging(io){
+    io.on('connection', (socket) => {
+    	var me = socket;
+  		var onevent = socket.onevent;
+  		socket.onevent = function(packet) {
+  			var args = packet.data || [];
+  			onevent.call(this, packet); // original call
+  			packet.data = ["*"].concat(args);
+  			onevent.call(this, packet); // additional call to catch-all
+  		};
+  		socket.on('*', (e, data) => {
+        let uid = shortid.generate();
+        let logblock = `${e}-${uid}`;
+        let logMeta = {
+          type: logTypes.WS,
+          logblock,
+          context: "WEBSOCKET"
+        };
+  			this.logger.info("The event %s has been called!", ansi.cyan(e), logMeta);
+        Object.assign(logMeta, data);
+        this.logger.info("Event Body: ", logMeta);
+  		});
+    });
+  }
 }
 
 module.exports = Logger;
