@@ -9,6 +9,7 @@ const util = require('util');
 const os = require('os');
 const mongodb = require('mongodb');
 const winston = require('winston');
+const _ = require('lodash');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const Stream = require('stream').Stream;
 const logTypes = require('database/logTypes');
@@ -250,13 +251,15 @@ MongoDB.prototype.log = function(info, cb) {
     let message = info.splat ? util.format(info.message, ...info.splat): info.message;
     entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
     entry.content += ' ';
-    entry.content += JSON.stringify(helpers.prepareMetaData(meta));
+    let metaObject = helpers.prepareMetaData(meta);
+    entry.content += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
     if (this.storeHost) {
       entry.hostname = this.hostname;
     }
     if (this.label) {
       entry.label = this.label;
     }
+
     this.logDb.collection(this.collection).insertOne(entry).then(()=>{
       this.emit('logged');
       cb(null, true);

@@ -130,7 +130,6 @@ class Logger {
         self.logger.info("Params: ", logMetaParams);
       }
 
-
       //log query
       if(!_.isEmpty(req.query)){
         let logMetaQuery = Object.assign({}, logMeta, req.query);
@@ -144,8 +143,8 @@ class Logger {
       }else{
         self.logger.info("Body Request is empty ", logMeta);
       }
-
       let end = res.end;
+      let x = self.logger;
       res.end = function (chunk, encoding) {
         //log response status and delay
         res.responseTime = (new Date()) - startTime;
@@ -159,8 +158,7 @@ class Logger {
         let msg = ansi.grey(`${req.method} ${req.url}`) +
           ansi[statusColor](` ${res.statusCode} `) +
           ansi.grey(`${res.responseTime}ms`);
-        self.logger.log(level(req, res), msg);
-
+        self.logger.log(level(req, res), msg, logMeta);
         //log response body
         if(!_.isEmpty(res.body)){
           let logMetaResponseBody = Object.assign({}, logMeta, res.body);

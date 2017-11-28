@@ -8,7 +8,7 @@ const logger = new Logger();
 
 logger.init({
   logDir: './logs',
-  port: 3000,
+  port: 3015,
   db: "mongodb://localhost/rt_qt_database",
   username: "",
   password: "",
@@ -26,7 +26,7 @@ app.use(logger.expressLogging());
 app.post('/*', (req, res) => {
   res.send('ok');
 });
-app.listen(3000, () => {
+app.listen(3005, () => {
 });
 
 let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";
