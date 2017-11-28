@@ -8,6 +8,7 @@ const logger = new Logger();
 
 logger.init({
   logDir: './logs',
+  port: 3000,
   db: "mongodb://localhost/rt_qt_database",
   username: "",
   password: "",

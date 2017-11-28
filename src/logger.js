@@ -19,7 +19,7 @@ const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('levelsSettings');
-
+const server = require('api/server');
 
 let instance = null;
 class Logger {
@@ -53,6 +53,21 @@ class Logger {
     this.level = process.env.LOG_LEVEL || lowestLevel;
     this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
 
+    //create mongo transport
+    const mongoTransport = new winstonMongo({
+      level: this.dbLevel,
+      db: this.options.db,
+      options: this.options.options,
+      username: this.options.username,
+      password: this.options.password,
+      keepAlive: 1000,
+      safe: true,
+      nativeParser: true,
+      decolorize: true
+    });
+    this.dbTransport = mongoTransport;
+
+    //create winston logger
     this.logger = createLogger({
       levels,
       transports: [
@@ -67,16 +82,10 @@ class Logger {
           )
         }),
         //create mongo transport for logger
-        new winstonMongo({
-          level: this.dbLevel,
-          db: this.options.db,
-          options: this.options.options,
-          username: this.options.username,
-          password: this.options.password,
-          decolorize: true
-        })
+        mongoTransport
       ]
     });
+
     //add level colors
     addColors({
       levels,
@@ -89,6 +98,9 @@ class Logger {
         return this.logger[level](...args);
       };
     }
+
+    //launch express logging api
+    server(this, options.appExpress, options.port);
   }
 
   /**
@@ -309,6 +321,22 @@ class Logger {
         Object.assign(logMeta, data);
         this.logger.info("Event Body: ", logMeta);
   		});
+    });
+  }
+
+  /**
+   * Mongo query to get saved logs
+   * @param  {Object} [options={}] query options
+   */
+  listLog(options = {}){
+    return new Promise ((resolve, reject) => {
+      this.dbTransport.query(options, (err, results) => {
+        if(err){
+          reject(err);
+        }else{
+          resolve(results);
+        }
+      });
     });
   }
 }

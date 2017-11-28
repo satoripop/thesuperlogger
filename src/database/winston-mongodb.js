@@ -14,7 +14,39 @@ const Stream = require('stream').Stream;
 const logTypes = require('database/logTypes');
 const helpers = require('./helpers');
 
+let Transport = require("winston-transport");
+Transport.prototype.normalizeQuery = function (options) {  //
+  options = options || {};
 
+  // limit
+  options.rows = options.rows || options.limit || 10;
+
+  // starting row offset
+  options.start = options.start || 0;
+
+  // now
+  options.until = options.until || new Date;
+  if (typeof options.until !== 'object') {
+    options.until = new Date(options.until);
+  }
+
+  // now - 24
+  options.from = options.from || (options.until - (24 * 60 * 60 * 1000));
+  if (typeof options.from !== 'object') {
+    options.from = new Date(options.from);
+  }
+
+  // 'asc' or 'desc'
+  options.order = options.order || 'desc';
+
+  // which fields to select
+  options.fields = options.fields;
+
+  return options;
+};
+Transport.prototype.formatResults = function (results, options) {
+    return results;
+};
 
 /**
  * Constructor for the MongoDB transport object.
@@ -50,7 +82,7 @@ const helpers = require('./helpers');
  * @param {number} options.expireAfterSeconds Seconds before the entry is removed. Do not use if capped is set.
  */
 let MongoDB = exports.MongoDB = function(options) {
-  winston.Transport.call(this, options);
+  Transport.call(this, options);
   options = (options || {});
   if (!options.db) {
     throw new Error('You should provide db to log to.');
@@ -143,14 +175,14 @@ let MongoDB = exports.MongoDB = function(options) {
 /**
  * Inherit from `winston.Transport`.
  */
-util.inherits(MongoDB, winston.Transport);
+util.inherits(MongoDB, Transport);
 
 
 /**
  * Define a getter so that `winston.transports.MongoDB`
  * is available and thus backwards compatible.
  */
-winston.transports.MongoDB = MongoDB;
+Transport.MongoDB = MongoDB;
 
 
 /**
