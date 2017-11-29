@@ -5,10 +5,15 @@ const ansi = require('chalk'),
   request = require('request');
 
 const logger = new Logger();
+//let app = express();
 
 logger.init({
   logDir: './logs',
-  port: 3015,
+  api: {
+    port: 3015,
+    //appExpress: app,
+    logRoute: '/logs',
+  },
   db: "mongodb://localhost/rt_qt_database",
   username: "",
   password: "",
@@ -17,6 +22,8 @@ logger.init({
     autoReconnect: false
   }
 });
+// app.listen(3005, () => {
+// });
 
 let string = "hey " + ansi.grey("you") + " %s!";
 logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});

@@ -26,7 +26,7 @@ Transport.prototype.normalizeQuery = function (options) {  //
   options.start = options.start || 0;
 
   // now
-  options.until = options.until || new Date;
+  options.until = options.until || new Date();
   if (typeof options.until !== 'object') {
     options.until = new Date(options.until);
   }
@@ -287,7 +287,26 @@ MongoDB.prototype.query = function(opt_options, cb) {
     opt_options = {};
   }
   let options = this.normalizeQuery(opt_options);
-  let query = {timestamp: {$gte: options.from, $lte: options.until}};
+  // filter by time
+  let query = {
+    timestamp: {$gte: options.from, $lte: options.until}
+  };
+  // filter by context
+  if(options.context){
+    Object.assign(query, {context: options.context});
+  }
+  // filter by logblock
+  if(options.logblock){
+    Object.assign(query, {logblock: options.logblock});
+  }
+  // filter by type
+  if(options.type){
+    Object.assign(query, {type: options.type});
+  }
+  // filter by level
+  if(options.level){
+    Object.assign(query, {level: options.level});
+  }
   let opt = {
     skip: options.start,
     limit: options.rows,
@@ -314,7 +333,7 @@ MongoDB.prototype.query = function(opt_options, cb) {
  */
 MongoDB.prototype.stream = function(options, stream) {
   options = options || {};
-  stream = stream || new Stream;
+  stream = stream || new Stream();
   let start = options.start;
   if (!this.logDb) {
     this._opQueue.push({method: 'stream', args: [options, stream]});
@@ -372,7 +391,7 @@ MongoDB.prototype.stream = function(options, stream) {
  */
 MongoDB.prototype.streamPoll = function(options, stream) {
   options = options || {};
-  stream = stream || new Stream;
+  stream = stream || new Stream();
   let self = this;
   let start = options.start;
   let last;
@@ -384,7 +403,7 @@ MongoDB.prototype.streamPoll = function(options, stream) {
     start = null;
   }
   if (start == null) {
-    last = new Date(new Date - 1000);
+    last = new Date(new Date() - 1000);
   }
   stream.destroy = function() {
     this.destroyed = true;

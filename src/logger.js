@@ -100,7 +100,7 @@ class Logger {
     }
 
     //launch express logging api
-    server(this, options.appExpress, options.port);
+    server(this, options.api);
   }
 
   /**
