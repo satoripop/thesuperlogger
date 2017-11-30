@@ -181,3 +181,9 @@ You'll have a block of log with the following settings:
 - logblock: [{eventName}-{uid}] 
 - context: *WEBSOCKET*
 - type: 3 (WS = 3, click [here](### Log types)) 
+
+### Accessing logs
+Our module provide two API endpoints to show logs:
+- The first one (/) shows all logs
+- The second one (/by-block) shows all logs grouped by logblock
+You can set the prefix of both endpoints
