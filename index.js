@@ -5,9 +5,15 @@ const ansi = require('chalk'),
   request = require('request');
 
 const logger = new Logger();
+//let app = express();
 
 logger.init({
   logDir: './logs',
+  api: {
+    port: 3015,
+    //appExpress: app,
+    logPrefix: '/logs',
+  },
   db: "mongodb://localhost/rt_qt_database",
   username: "",
   password: "",
@@ -16,6 +22,8 @@ logger.init({
     autoReconnect: false
   }
 });
+// app.listen(3005, () => {
+// });
 
 let string = "hey " + ansi.grey("you") + " %s!";
 logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
@@ -25,7 +33,7 @@ app.use(logger.expressLogging());
 app.post('/*', (req, res) => {
   res.send('ok');
 });
-app.listen(3000, () => {
+app.listen(3005, () => {
 });
 
 let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";

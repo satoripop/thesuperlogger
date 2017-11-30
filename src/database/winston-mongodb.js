@@ -9,12 +9,45 @@ const util = require('util');
 const os = require('os');
 const mongodb = require('mongodb');
 const winston = require('winston');
+const _ = require('lodash');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const Stream = require('stream').Stream;
 const logTypes = require('database/logTypes');
 const helpers = require('./helpers');
 
+let Transport = require("winston-transport");
+Transport.prototype.normalizeQuery = function (options) {  //
+  options = options || {};
 
+  // limit
+  options.rows = options.rows || options.limit || 10;
+
+  // starting row offset
+  options.start = options.start || 0;
+
+  // now
+  options.until = options.until || new Date();
+  if (typeof options.until !== 'object') {
+    options.until = new Date(options.until);
+  }
+
+  // now - 24
+  options.from = options.from || (options.until - (24 * 60 * 60 * 1000));
+  if (typeof options.from !== 'object') {
+    options.from = new Date(options.from);
+  }
+
+  // 'asc' or 'desc'
+  options.order = options.order || 'desc';
+
+  // which fields to select
+  options.fields = options.fields;
+
+  return options;
+};
+Transport.prototype.formatResults = function (results, options) {
+    return results;
+};
 
 /**
  * Constructor for the MongoDB transport object.
@@ -50,7 +83,7 @@ const helpers = require('./helpers');
  * @param {number} options.expireAfterSeconds Seconds before the entry is removed. Do not use if capped is set.
  */
 let MongoDB = exports.MongoDB = function(options) {
-  winston.Transport.call(this, options);
+  Transport.call(this, options);
   options = (options || {});
   if (!options.db) {
     throw new Error('You should provide db to log to.');
@@ -143,14 +176,14 @@ let MongoDB = exports.MongoDB = function(options) {
 /**
  * Inherit from `winston.Transport`.
  */
-util.inherits(MongoDB, winston.Transport);
+util.inherits(MongoDB, Transport);
 
 
 /**
  * Define a getter so that `winston.transports.MongoDB`
  * is available and thus backwards compatible.
  */
-winston.transports.MongoDB = MongoDB;
+Transport.MongoDB = MongoDB;
 
 
 /**
@@ -218,13 +251,15 @@ MongoDB.prototype.log = function(info, cb) {
     let message = info.splat ? util.format(info.message, ...info.splat): info.message;
     entry.content = this.decolorize ? message.replace(/\u001b\[[0-9]{1,2}m/g, '') : message;
     entry.content += ' ';
-    entry.content += JSON.stringify(helpers.prepareMetaData(meta));
+    let metaObject = helpers.prepareMetaData(meta);
+    entry.content += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
     if (this.storeHost) {
       entry.hostname = this.hostname;
     }
     if (this.label) {
       entry.label = this.label;
     }
+
     this.logDb.collection(this.collection).insertOne(entry).then(()=>{
       this.emit('logged');
       cb(null, true);
@@ -252,7 +287,26 @@ MongoDB.prototype.query = function(opt_options, cb) {
     opt_options = {};
   }
   let options = this.normalizeQuery(opt_options);
-  let query = {timestamp: {$gte: options.from, $lte: options.until}};
+  // filter by time
+  let query = {
+    timestamp: {$gte: options.from, $lte: options.until}
+  };
+  // filter by context
+  if(options.context){
+    Object.assign(query, {context: options.context});
+  }
+  // filter by logblock
+  if(options.logblock){
+    Object.assign(query, {logblock: options.logblock});
+  }
+  // filter by type
+  if(options.type){
+    Object.assign(query, {type: options.type});
+  }
+  // filter by level
+  if(options.level){
+    Object.assign(query, {level: options.level});
+  }
   let opt = {
     skip: options.start,
     limit: options.rows,
@@ -261,12 +315,19 @@ MongoDB.prototype.query = function(opt_options, cb) {
   if (options.fields) {
     opt.fields = options.fields;
   }
-  this.logDb.collection(this.collection).find(query, opt).toArray().then(docs=>{
-    if (!options.includeIds) {
-      docs.forEach(log=>delete log._id);
-    }
-    cb(null, docs);
-  }).catch(cb);
+  if (options.group) {
+    const fullQuery = [
+      { $match : query },
+      { $group : { _id : '$logblock', logs: { $push: '$$ROOT' } } }
+    ];
+    this.logDb.collection(this.collection).aggregate(fullQuery, opt).toArray().then(docs=>{
+      cb(null, docs);
+    }).catch(cb);
+  } else {
+    this.logDb.collection(this.collection).find(query, opt).toArray().then(docs=>{
+      cb(null, docs);
+    }).catch(cb);
+  }
 };
 
 
@@ -279,7 +340,7 @@ MongoDB.prototype.query = function(opt_options, cb) {
  */
 MongoDB.prototype.stream = function(options, stream) {
   options = options || {};
-  stream = stream || new Stream;
+  stream = stream || new Stream();
   let start = options.start;
   if (!this.logDb) {
     this._opQueue.push({method: 'stream', args: [options, stream]});
@@ -337,7 +398,7 @@ MongoDB.prototype.stream = function(options, stream) {
  */
 MongoDB.prototype.streamPoll = function(options, stream) {
   options = options || {};
-  stream = stream || new Stream;
+  stream = stream || new Stream();
   let self = this;
   let start = options.start;
   let last;
@@ -349,7 +410,7 @@ MongoDB.prototype.streamPoll = function(options, stream) {
     start = null;
   }
   if (start == null) {
-    last = new Date(new Date - 1000);
+    last = new Date(new Date() - 1000);
   }
   stream.destroy = function() {
     this.destroyed = true;
