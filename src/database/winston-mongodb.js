@@ -315,12 +315,19 @@ MongoDB.prototype.query = function(opt_options, cb) {
   if (options.fields) {
     opt.fields = options.fields;
   }
-  this.logDb.collection(this.collection).find(query, opt).toArray().then(docs=>{
-    if (!options.includeIds) {
-      docs.forEach(log=>delete log._id);
-    }
-    cb(null, docs);
-  }).catch(cb);
+  if (options.group) {
+    const fullQuery = [
+      { $match : query },
+      { $group : { _id : '$logblock', logs: { $push: '$$ROOT' } } }
+    ];
+    this.logDb.collection(this.collection).aggregate(fullQuery, opt).toArray().then(docs=>{
+      cb(null, docs);
+    }).catch(cb);
+  } else {
+    this.logDb.collection(this.collection).find(query, opt).toArray().then(docs=>{
+      cb(null, docs);
+    }).catch(cb);
+  }
 };
 
 
