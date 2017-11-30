@@ -12,7 +12,7 @@ logger.init({
   api: {
     port: 3015,
     //appExpress: app,
-    logRoute: '/logs',
+    logPrefix: '/logs',
   },
   db: "mongodb://localhost/rt_qt_database",
   username: "",
