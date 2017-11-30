@@ -41,6 +41,10 @@ Logger is a singleton class. The init method should be called only once on your 
 const Logger = require('super-logger');
 logger = new Logger();
 logger.init({
+  api: {
+    port: 3015,
+    logPrefix: '/logs',
+  },
   db: "mongodb://localhost/my_database",
   logDir: './logs',
   username: "my_username",
@@ -182,8 +186,40 @@ You'll have a block of log with the following settings:
 - context: *WEBSOCKET*
 - type: 3 (WS = 3, click [here](### Log types)) 
 
-### Accessing logs
-Our module provide two API endpoints to show logs:
-- The first one (/) shows all logs
-- The second one (/by-block) shows all logs grouped by logblock
-You can set the prefix of both endpoints
+### Logging API
+Our module provide two API endpoints to show logs. These 2 endpoints have a prefixed route that you can set or leave it with a default value "/".
+
+You can pass your own express app as follow:
+```
+let app = express();
+
+logger.init({
+  logDir: './logs',
+  api: {
+    appExpress: app,
+    logPrefix: '/logs',
+  },
+  ...
+});
+app.listen(3005);
+```
+Or you can just set the port the api will work on
+```
+logger.init({
+  logDir: './logs',
+  api: {
+    port: 3000,
+    logPrefix: '/logs',
+  },
+  ...
+});
+```
+The two endpoints are:
+- The first one ([PREFIX]/) shows all logs
+- The second one ([PREFIX]/by-block) shows all logs grouped by logblock
+
+The params you can pass on query to filter your logs:
+- context
+- logblock
+- type
+- level
