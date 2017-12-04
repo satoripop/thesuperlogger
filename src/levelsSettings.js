@@ -45,3 +45,22 @@ module.exports.levelFromStatus = () =>{
     return level;
   };
 };
+
+
+module.exports.levelFromResStatus = (status) =>{
+  var level = "";
+  switch(status){
+    case 200:
+      level = "debug";
+      break;
+    case 400:
+      level = "warning";
+      break;
+    case 500:
+      level = "error";
+      break;
+    default:
+      level = "info";
+  }
+  return level;
+};
