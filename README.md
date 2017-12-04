@@ -223,3 +223,5 @@ The params you can pass on query to filter your logs:
 - logblock
 - type
 - level
+
+The logs are paginated starting with page 0.
