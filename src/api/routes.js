@@ -15,12 +15,16 @@ module.exports.routes = (logger, app, routesPrefix) => {
   // Main route
   const mainRoute = `${routesPrefix}`;
   app.get(mainRoute, (req, res) => {
-    const { context, logblock, type, level } = req.query;
+    let { context, logblock, type, level, page } = req.query;
+    page = page || 0;
+    const pageSize = 10;
+    const start = page * pageSize;
+    const limit = start + pageSize;
     const options = {
-      from: new Date() - (3 * 24 * 60 * 60 * 1000),
+      from: new Date() - (30 * 24 * 60 * 60 * 1000),
       until: new Date(),
-      limit: 100,
-      start: 0,
+      limit,
+      start,
       context,
       logblock,
       type,
@@ -40,12 +44,16 @@ module.exports.routes = (logger, app, routesPrefix) => {
   // Grouped by logblock route
   const groupedRoute = `${routesPrefix}/by-block`;
   app.get(groupedRoute, (req, res) => {
-    const { context, logblock, type, level } = req.query;
+    let { context, logblock, type, level, page } = req.query;
+    page = page || 0;
+    const pageSize = 10;
+    const start = page * pageSize;
+    const limit = start + pageSize;
     const options = {
-      from: new Date() - (3 * 24 * 60 * 60 * 1000),
+      from: new Date() - (30 * 24 * 60 * 60 * 1000),
       until: new Date(),
-      limit: 100,
-      start: 0,
+      limit,
+      start,
       context,
       logblock,
       type,
