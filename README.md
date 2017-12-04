@@ -60,6 +60,11 @@ To reuse the logger on different files, you just need to call the logger as foll
 const Logger = require('super-logger');
 logger = new Logger();
 ```
+> **Note:**
+
+> We used [winston-mongodb](https://github.com/winstonjs/winston-mongodb) as our mongodb transport and personalized it to our module by changing the log and query methods and by making it compatible to winston v3. 
+> The implementation and initialization is still the same. 
+
 ### Levels and console colors:
 The levels of Super Logger are:
 - debug (green on Console)
