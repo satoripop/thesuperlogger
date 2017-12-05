@@ -18,7 +18,7 @@ const isHtml = require('is-html');
 // our own modules
 const winstonMongo = require('./database/winston-mongodb').MongoDB;
 const logTypes = require('./database/logTypes');
-const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('levelsSettings');
+const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./levelsSettings');
 const server = require('./api/server');
 
 let instance = null;
