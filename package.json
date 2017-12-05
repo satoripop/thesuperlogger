@@ -2,9 +2,8 @@
   "name": "super-logger",
   "version": "1.0.0-rc1",
   "description": "An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage).",
-  "main": "index.js",
+  "main": "./src/logger.js",
   "scripts": {
-    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
