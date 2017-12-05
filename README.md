@@ -83,6 +83,11 @@ We have a specific kind of logging for each of these types:
 - [REST_CLIENT](### Request logging): 2 -> requests logging
 - [WS](### Websocket logging): 3 -> ws event calls logging
 
+You can access log types as following:
+```
+console.log(logger.logTypes);
+```
+
 ### Pre-existing context:
 We use these context. But you can add your own as you please:
 - REQUEST: for logs on api or url requests
