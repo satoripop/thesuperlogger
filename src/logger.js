@@ -8,8 +8,6 @@
 // winston helpers
 const { createLogger, format, transports, addColors, add } = require('winston');
 const { combine, prettyPrint, colorize} = format;
-const winstonMongo = require('database/winston-mongodb').MongoDB;
-const logTypes = require('database/logTypes');
 // dependency modules
 const ansi = require('chalk');
 const moment = require('moment');
@@ -18,8 +16,10 @@ const _ = require('lodash');
 const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
+const winstonMongo = require('./database/winston-mongodb').MongoDB;
+const logTypes = require('./database/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('levelsSettings');
-const server = require('api/server');
+const server = require('./api/server');
 
 let instance = null;
 class Logger {

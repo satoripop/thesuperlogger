@@ -6,7 +6,7 @@
  */
 
 const _ = require('lodash');
-const { routes } = require('api/routes');
+const { routes } = require('./routes');
 
 /**
  * launching express server for api Logging
