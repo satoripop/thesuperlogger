@@ -25,6 +25,7 @@ let instance = null;
 class Logger {
   constructor() {
     if (!instance) {
+      this.logTypes = logTypes;
       instance = this;
     }
     return instance;
