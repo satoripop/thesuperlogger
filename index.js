@@ -24,7 +24,7 @@ logger.init({
 });
 // app.listen(3005, () => {
 // });
-
+console.log(JSON.stringify(logger.logTypes));
 let string = "hey " + ansi.grey("you") + " %s!";
 logger.error(string, "yutut", {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
 
