@@ -12,7 +12,7 @@ const winston = require('winston');
 const _ = require('lodash');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const Stream = require('stream').Stream;
-const logTypes = require('database/logTypes');
+const logTypes = require('./logTypes');
 const helpers = require('./helpers');
 
 let Transport = require("winston-transport");
