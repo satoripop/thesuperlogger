@@ -16,9 +16,9 @@ const _ = require('lodash');
 const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
-const winstonMongo = require('./database/winston-mongodb').MongoDB;
-const logTypes = require('./database/logTypes');
-const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./levelsSettings');
+const winstonMongo = require('./transports/winston-mongodb').MongoDB;
+const logTypes = require('./helpers/logTypes');
+const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
 
 let instance = null;
