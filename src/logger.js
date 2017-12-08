@@ -16,9 +16,10 @@ const _ = require('lodash');
 const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
-const winstonMongo = require('./database/winston-mongodb').MongoDB;
-const logTypes = require('./database/logTypes');
-const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./levelsSettings');
+const winstonMongo = require('./transports/winston-mongodb').MongoDB;
+const winstonConsole = require('./transports/winston-console');
+const logTypes = require('./helpers/logTypes');
+const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
 
 let instance = null;
@@ -68,20 +69,22 @@ class Logger {
     });
     this.dbTransport = mongoTransport;
 
+    //create console transport
+    const consoleTransport = new winstonConsole({
+      level: this.level,
+      format: combine(
+        colorize(),
+        prettyPrint(),
+        format.splat(),
+        format.simple()
+      )
+    });
     //create winston logger
     this.logger = createLogger({
       levels,
       transports: [
         //create console transport for logger
-        new (transports.Console)({
-          level: this.level,
-          format: combine(
-            colorize(),
-            prettyPrint(),
-            format.splat(),
-            format.simple()
-          )
-        }),
+        consoleTransport,
         //create mongo transport for logger
         mongoTransport
       ]

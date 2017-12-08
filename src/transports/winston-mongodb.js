@@ -4,6 +4,7 @@
  * @license MIT
  * @author charlie@nodejitsu.com (Charlie Robbins)
  * @author 0@39.yt (Yurij Mikhalevich)
+ * @author imen.ammar@satoripop.tn (Imen Ammar)
  */
 const util = require('util');
 const os = require('os');
@@ -12,7 +13,7 @@ const winston = require('winston');
 const _ = require('lodash');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const Stream = require('stream').Stream;
-const logTypes = require('./logTypes');
+const logTypes = require('../helpers/logTypes');
 const helpers = require('./helpers');
 
 let Transport = require("winston-transport");
