@@ -275,7 +275,7 @@ class Logger {
             let logMetaBody = Object.assign({}, logMeta, body);
             this.logger.info("Body Response", logMetaBody);
           } catch (e) {
-            let logMetaBodyError = Object.assign(logMeta, body);
+            let logMetaBodyError = Object.assign({}, logMeta, {body});
             //log error if body can't be parsed to json object
             this.logger.error("Parsing body response to object fail: ", logMetaBodyError);
             this.logger.info("Body Response: %s", body, logMeta);
