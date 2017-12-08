@@ -8,9 +8,12 @@
 
 const os = require('os');
 const util = require('util');
+const ansi = require('chalk');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const TransportStream = require('winston-transport');
-
+const helpers = require('./helpers');
+const {colors} = require('../helpers/levelsSettings');
+const _ = require('lodash');
 //
 // ### function Console (options)
 // #### @options {Object} Options for this instance.
@@ -20,7 +23,6 @@ const TransportStream = require('winston-transport');
 var Console = module.exports = function (options) {
   options = options || {};
   TransportStream.call(this, options);
-
   this.stderrLevels = getStderrLevels(options.stderrLevels, options.debugStdout);
   this.eol = options.eol || os.EOL;
 
@@ -79,13 +81,28 @@ Console.prototype.log = function (info, callback) {
   //
   // Remark: what if there is no raw...?
   //
+  let meta;
+  if (info.splat) {
+    meta = Object.assign({}, info.meta);
+  } else {
+    meta = Object.assign({}, info);
+    delete meta.message;
+    delete meta.level;
+  }
+  delete meta.type;
+  let message = ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
+  message += info.splat ? util.format(info.message, ...info.splat): info.message;
+  message += ' ';
+  let metaObject = helpers.prepareMetaData(meta);
+  message += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
+
   if (this.stderrLevels[info[LEVEL]]) {
-    process.stderr.write(info[MESSAGE] + this.eol);
+    process.stderr.write(message + this.eol);
     if (callback) { callback(); } // eslint-disable-line
     return;
   }
 
-  process.stdout.write(info[MESSAGE] + this.eol);
+  process.stdout.write(message + this.eol);
   if (callback) { callback(); } // eslint-disable-line
 };
 
