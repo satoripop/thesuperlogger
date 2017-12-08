@@ -89,20 +89,27 @@ Console.prototype.log = function (info, callback) {
     delete meta.message;
     delete meta.level;
   }
+  let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
+  delete meta.logblock;
+  delete meta.context;
   delete meta.type;
+  delete meta.splat;
   let message = ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
-  message += info.splat ? util.format(info.message, ...info.splat): info.message;
-  message += ' ';
+  message += info.message.replace(/^\s+|\s+$/g, '');
+
   let metaObject = helpers.prepareMetaData(meta);
+  message += _.isEmpty(metaObject) ? '': '\n';
   message += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
+  message += _.isEmpty(extras) ? '': '\n';
+  message += _.isEmpty(extras) ? '': JSON.stringify(extras);
 
   if (this.stderrLevels[info[LEVEL]]) {
-    process.stderr.write(message + this.eol);
+    process.stderr.write(message + this.eol + this.eol);
     if (callback) { callback(); } // eslint-disable-line
     return;
   }
 
-  process.stdout.write(message + this.eol);
+  process.stdout.write(message + this.eol + this.eol);
   if (callback) { callback(); } // eslint-disable-line
 };
 
