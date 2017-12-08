@@ -71,6 +71,7 @@ Console.prototype.name = 'console';
 //
 Console.prototype.log = function (info, callback) {
   var self = this;
+
   setImmediate(function () {
     self.emit('logged', info);
   });
