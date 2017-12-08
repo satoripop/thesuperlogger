@@ -317,7 +317,7 @@ class Logger {
           context: "WEBSOCKET"
         };
   			this.logger.info("The event %s has been called!", ansi.cyan(e), logMeta);
-        Object.assign(logMeta, data);
+        Object.assign(logMeta, {data});
         this.logger.info("Event Body: ", logMeta);
   		});
     });
