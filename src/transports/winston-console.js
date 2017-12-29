@@ -9,6 +9,7 @@
 const os = require('os');
 const util = require('util');
 const ansi = require('chalk');
+const moment = require('moment');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const TransportStream = require('winston-transport');
 const helpers = require('./helpers');
@@ -94,7 +95,8 @@ Console.prototype.log = function (info, callback) {
   delete meta.context;
   delete meta.type;
   delete meta.splat;
-  let message = ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
+  let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';
+  message += ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
   message += info.message.replace(/^\s+|\s+$/g, '');
 
   let metaObject = helpers.prepareMetaData(meta);
