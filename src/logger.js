@@ -105,6 +105,23 @@ class Logger {
 
     //launch express logging api
     server(this, options.api);
+
+    //log uncaughtExceptions
+    this.logExceptions();
+  }
+
+  /**
+   * log uncaught exceptions
+   */
+  logExceptions() {
+    process.once('uncaughtException', err => {
+      this.logger.emergency('Server is down.', {
+        context: this.logTypes.BASE,
+        logblock: 'uncaughtException-' + shortid.generate(),
+        err
+      });
+      process.exit(1);
+    });
   }
 
   /**
@@ -122,7 +139,7 @@ class Logger {
       let logblock = `${req.url}-${req.method}-${uid}`;
       let logMeta = {
         context: "EXPRESS",
-        type: logTypes.REST_SERVER,
+        type: this.logTypes.REST_SERVER,
         logblock
       };
       //log on call
@@ -192,7 +209,7 @@ class Logger {
       .replace(/\//g, "-");
     let logblock = `${urlName}-${method}-${uid}`;
     let logMeta = {
-      type: logTypes.REST_CLIENT,
+      type: this.logTypes.REST_CLIENT,
       logblock,
       context: "REQUEST"
     };
@@ -246,7 +263,7 @@ class Logger {
 
     let logblock = `${urlName}-${method}-${uid}`;
     let logMeta = {
-      type: logTypes.REST_CLIENT,
+      type: this.logTypes.REST_CLIENT,
       logblock,
       context: "REQUEST"
     };
@@ -315,7 +332,7 @@ class Logger {
         let uid = shortid.generate();
         let logblock = `${e}-${uid}`;
         let logMeta = {
-          type: logTypes.WS,
+          type: this.logTypes.WS,
           logblock,
           context: "WEBSOCKET"
         };
