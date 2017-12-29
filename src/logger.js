@@ -127,7 +127,6 @@ class Logger {
   /**
    * expresse Middleware:
    * a Middleware for express to log called routes in a morgan style logging
-   * @return {[type]} [description]
    */
   expressLogging() {
     let level = levelFromStatus();
