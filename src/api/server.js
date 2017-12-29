@@ -19,15 +19,17 @@ module.exports = (logger, api) => {
   let routesPrefix = api.logPrefix || '/';
   // pass express app
   if (api.appExpress && !_.isEmpty(api.appExpress)) {
+    app.use(express.static(__dirname + logger.logDir));
     routes(logger, api.appExpress, routesPrefix);
-  // create express app
-} else if (api.port) {
-    const express = require('express');
-    let app = express();
-    routes(logger, app, routesPrefix);
-    app.listen(api.port, () => {
-      console.log("Logging server is working on ", api.port);
-    });
+    // create express app
+  } else if (api.port) {
+      const express = require('express');
+      let app = express();
+      app.use(express.static(__dirname + logger.logDir));
+      routes(logger, app, routesPrefix);
+      app.listen(api.port, () => {
+        console.log("Logging server is working on ", api.port);
+      });
   } else {
     throw new Error('You need to pass a port or an existing express app');
   }
