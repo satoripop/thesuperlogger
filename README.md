@@ -235,3 +235,9 @@ The params you can pass on query to filter your logs:
 - level
 
 The logs are paginated starting with page 0.
+
+# Todos:
+
+- add logging unhandled exceptions
+- add timestamp in console
+- add read html log files
