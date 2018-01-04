@@ -274,7 +274,7 @@ class Logger {
       //log request call
       let level = levelFromResStatus(httpResponse.statusCode);
       let msg = api ? "%s API Response %s " : "%s Response %s ";
-      let status = (err || httpResponse.statusCode > 200 || httpResponse.statusCode < 200) ?
+      let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
         ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
         ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
       this.logger.log(level, msg, status, ansi.magenta(`${url}: ${method}`), logMeta);
