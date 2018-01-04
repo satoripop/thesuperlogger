@@ -275,15 +275,15 @@ class Logger {
       if (isHtml(body)) {
         let data = body.toString();
         let path = `${this.logDir}/${uid}.html`;
-        fs.writeFile(path, data, 'utf8', function(rerr) {
+        fs.writeFile(path, data, 'utf8', (rerr) => {
     			if (rerr) {
-    				return logger.error(rerr, logMeta);
+    				this.logger.error('Error on write error file', Object.assign({}, logMeta, {err: rerr}));
     			}
     		});
         this.logger.info("Body Response saved in a HTML file: %s", path, logMeta);
-      //log body
-      } else if (typeof body == "string") {
-        if (json){
+        //log body
+      } else if (typeof body === "string") {
+        if (json) {
           try {
             body = JSON.parse(body);
             let logMetaBody = Object.assign({}, logMeta, body);
@@ -294,12 +294,12 @@ class Logger {
             this.logger.error("Parsing body response to object fail: ", logMetaBodyError);
             this.logger.info("Body Response: %s", body, logMeta);
           }
-        }else{
-          this.logger.info("Body Response: %s", body, logMeta);
+        } else {
+          this.logger.info("Body Response: %s", body.toString(), logMeta);
         }
       //log body if string or object
-      } else if (typeof body === 'object') {
-        let logMetaBody = Object.assign({}, logMeta, body);
+      } else if (typeof body === "object") {
+        let logMetaBody = Object.assign({}, logMeta, { body: JSON.stringify(body) });
         this.logger.info("Body Response", logMetaBody);
       } else {
         body = body.toString();
