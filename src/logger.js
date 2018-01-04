@@ -96,13 +96,6 @@ class Logger {
       colors
     });
 
-    //add wrapper functions for levels
-    for(let level in levels){
-      Logger.prototype[level] = (...args) => {
-        return this.logger[level](...args);
-      };
-    }
-
     //launch express logging api
     server(this, options.api);
 
@@ -358,6 +351,33 @@ class Logger {
         }
       });
     });
+  }
+
+
+  //add wrapper functions for levels
+  debug (...args) {
+    return this.logger.debug(...args);
+  }
+	info (...args) {
+    return this.logger.info(...args);
+  }
+	notice (...args) {
+    return this.logger.notice(...args);
+  }
+	warning (...args) {
+    return this.logger.warning(...args);
+  }
+	error (...args) {
+    return this.logger.error(...args);
+  }
+	critical (...args) {
+    return this.logger.critical(...args);
+  }
+	alert (...args) {
+    return this.logger.alert(...args);
+  }
+	emergency (...args) {
+    return this.logger.emergency(...args);
   }
 }
 
