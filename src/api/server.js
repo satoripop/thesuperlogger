@@ -17,15 +17,16 @@ const { routes } = require('./routes');
  */
 module.exports = (logger, api) => {
   let routesPrefix = api.logPrefix || '/';
+  let logFilesPrefix = routesPrefix + '/logFiles'
   // pass express app
   if (api.appExpress && !_.isEmpty(api.appExpress)) {
-    app.use(express.static(__dirname + logger.logDir));
+    app.use(logFilesPrefix, express.static(logger.logDir));
     routes(logger, api.appExpress, routesPrefix);
     // create express app
   } else if (api.port) {
       const express = require('express');
       let app = express();
-      app.use(express.static(__dirname + logger.logDir));
+      app.use(logFilesPrefix, express.static(logger.logDir));
       routes(logger, app, routesPrefix);
       app.listen(api.port, () => {
         console.log("Logging server is working on ", api.port);
