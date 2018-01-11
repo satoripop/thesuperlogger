@@ -13,6 +13,7 @@ const ansi = require('chalk');
 const moment = require('moment');
 const shortid = require('shortid');
 const _ = require('lodash');
+const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
@@ -109,7 +110,7 @@ class Logger {
   logExceptions() {
     process.once('uncaughtException', err => {
       this.logger.emergency('Server is down.', {
-        context: this.logTypes.BASE,
+        context: "GENERAL",
         logblock: 'uncaughtException-' + shortid.generate(),
         err
       });
@@ -299,7 +300,7 @@ class Logger {
         }
       //log body if string or object
       } else if (typeof body === "object") {
-        let logMetaBody = Object.assign({}, logMeta, { body: JSON.stringify(body) });
+        let logMetaBody = Object.assign({}, logMeta, { body: JSON.stringify(body, circular()) });
         this.logger.info("Body Response", logMetaBody);
       } else {
         body = body.toString();
