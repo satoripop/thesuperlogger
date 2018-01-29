@@ -223,7 +223,7 @@ class Logger {
     ):{};
     if(!_.isEmpty(query)){
       let logMetaQuery = Object.assign({}, logMeta, {query});
-      this.logger.info('Body request: ', logMetaQuery);
+      this.logger.info('Query params: ', logMetaQuery);
     }
 
     //log the request body

@@ -142,7 +142,7 @@ Whenever you make a request to an API or route you can log its:
 
 If the body response is an object, array or string it will be saved in your log content.
 
-If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.  You can easily access these files on your browser on this url: /[logPrefix]/logFiles/filename.html
+If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.  You can easily access these files on your browser on this url: /[logPrefix]/log-files/filename.html
 
 You'll have a block of log with the following settings:
 - logblock: [{url}-{method}-{uid}]
@@ -237,9 +237,14 @@ The params you can pass on query to filter your logs:
 The logs are paginated starting with page 0.
 
 # Todos:
+  - create middleware for botbuilder like: [botbuilder-logging](http://www.npmjs.com/package/botbuilder-logging) or [botBuilder-samples](https://github.com/Microsoft/BotBuilder-Samples/tree/master/Node/capability-middlewareLogging)
+  - create script that runs a standalone express api
+  - set severity
+  - activate/desactivate Logging
+  - alert by email on specific level
   - add unit testing
-
-- add read html log files
-- add read html log files
-- fix bash colors
-- fix powerShell magenta color
+  - add read html log files
+  - add read html log files
+  - fix bash colors
+  - fix powerShell magenta color
+  - pass shortId as optional to request logging.
