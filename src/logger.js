@@ -13,12 +13,14 @@ const ansi = require('chalk');
 const moment = require('moment');
 const shortid = require('shortid');
 const _ = require('lodash');
+const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
-const winstonMongo = require('./database/winston-mongodb').MongoDB;
-const logTypes = require('./database/logTypes');
-const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./levelsSettings');
+const winstonMongo = require('./transports/winston-mongodb').MongoDB;
+const winstonConsole = require('./transports/winston-console');
+const logTypes = require('./helpers/logTypes');
+const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
 
 let instance = null;
@@ -68,20 +70,22 @@ class Logger {
     });
     this.dbTransport = mongoTransport;
 
+    //create console transport
+    const consoleTransport = new winstonConsole({
+      level: this.level,
+      format: combine(
+        colorize(),
+        prettyPrint(),
+        format.splat(),
+        format.simple()
+      )
+    });
     //create winston logger
     this.logger = createLogger({
       levels,
       transports: [
         //create console transport for logger
-        new (transports.Console)({
-          level: this.level,
-          format: combine(
-            colorize(),
-            prettyPrint(),
-            format.splat(),
-            format.simple()
-          )
-        }),
+        consoleTransport,
         //create mongo transport for logger
         mongoTransport
       ]
@@ -93,21 +97,30 @@ class Logger {
       colors
     });
 
-    //add wrapper functions for levels
-    for(let level in levels){
-      Logger.prototype[level] = (...args) => {
-        return this.logger[level](...args);
-      };
-    }
-
     //launch express logging api
     server(this, options.api);
+
+    //log uncaughtExceptions
+    this.logExceptions();
+  }
+
+  /**
+   * log uncaught exceptions
+   */
+  logExceptions() {
+    process.once('uncaughtException', err => {
+      this.logger.emergency('Server is down.', {
+        context: "GENERAL",
+        logblock: 'uncaughtException-' + shortid.generate(),
+        err
+      });
+      process.exit(1);
+    });
   }
 
   /**
    * expresse Middleware:
    * a Middleware for express to log called routes in a morgan style logging
-   * @return {[type]} [description]
    */
   expressLogging() {
     let level = levelFromStatus();
@@ -119,7 +132,7 @@ class Logger {
       let logblock = `${req.url}-${req.method}-${uid}`;
       let logMeta = {
         context: "EXPRESS",
-        type: logTypes.REST_SERVER,
+        type: this.logTypes.REST_SERVER,
         logblock
       };
       //log on call
@@ -189,7 +202,7 @@ class Logger {
       .replace(/\//g, "-");
     let logblock = `${urlName}-${method}-${uid}`;
     let logMeta = {
-      type: logTypes.REST_CLIENT,
+      type: this.logTypes.REST_CLIENT,
       logblock,
       context: "REQUEST"
     };
@@ -210,7 +223,7 @@ class Logger {
     ):{};
     if(!_.isEmpty(query)){
       let logMetaQuery = Object.assign({}, logMeta, {query});
-      this.logger.info('Body request: ', logMetaQuery);
+      this.logger.info('Query params: ', logMetaQuery);
     }
 
     //log the request body
@@ -243,7 +256,7 @@ class Logger {
 
     let logblock = `${urlName}-${method}-${uid}`;
     let logMeta = {
-      type: logTypes.REST_CLIENT,
+      type: this.logTypes.REST_CLIENT,
       logblock,
       context: "REQUEST"
     };
@@ -255,21 +268,23 @@ class Logger {
       //log request call
       let level = levelFromResStatus(httpResponse.statusCode);
       let msg = api ? "%s API Response %s " : "%s Response %s ";
-      let status = (err || httpResponse.statusCode != 200) ? ansi.red.bold('[Error]') : ansi.green.bold('[Success]');
+      let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
+        ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
+        ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
       this.logger.log(level, msg, status, ansi.magenta(`${url}: ${method}`), logMeta);
       //log file containing html body
       if (isHtml(body)) {
         let data = body.toString();
         let path = `${this.logDir}/${uid}.html`;
-        fs.writeFile(path, data, 'utf8', function(rerr) {
+        fs.writeFile(path, data, 'utf8', (rerr) => {
     			if (rerr) {
-    				return logger.error(rerr, logMeta);
+    				this.logger.error('Error on write error file', Object.assign({}, logMeta, {err: rerr}));
     			}
     		});
         this.logger.info("Body Response saved in a HTML file: %s", path, logMeta);
-      //log body
-      } else if (typeof body == "string") {
-        if (json){
+        //log body
+      } else if (typeof body === "string") {
+        if (json) {
           try {
             body = JSON.parse(body);
             let logMetaBody = Object.assign({}, logMeta, body);
@@ -280,12 +295,12 @@ class Logger {
             this.logger.error("Parsing body response to object fail: ", logMetaBodyError);
             this.logger.info("Body Response: %s", body, logMeta);
           }
-        }else{
-          this.logger.info("Body Response: %s", body, logMeta);
+        } else {
+          this.logger.info("Body Response: %s", body.toString(), logMeta);
         }
       //log body if string or object
-      } else if (typeof body === 'object') {
-        let logMetaBody = Object.assign({}, logMeta, body);
+      } else if (typeof body === "object") {
+        let logMetaBody = Object.assign({}, logMeta, { body: JSON.stringify(body, circular()) });
         this.logger.info("Body Response", logMetaBody);
       } else {
         body = body.toString();
@@ -312,7 +327,7 @@ class Logger {
         let uid = shortid.generate();
         let logblock = `${e}-${uid}`;
         let logMeta = {
-          type: logTypes.WS,
+          type: this.logTypes.WS,
           logblock,
           context: "WEBSOCKET"
         };
@@ -337,6 +352,33 @@ class Logger {
         }
       });
     });
+  }
+
+
+  //add wrapper functions for levels
+  debug (...args) {
+    return this.logger.debug(...args);
+  }
+	info (...args) {
+    return this.logger.info(...args);
+  }
+	notice (...args) {
+    return this.logger.notice(...args);
+  }
+	warning (...args) {
+    return this.logger.warning(...args);
+  }
+	error (...args) {
+    return this.logger.error(...args);
+  }
+	critical (...args) {
+    return this.logger.critical(...args);
+  }
+	alert (...args) {
+    return this.logger.alert(...args);
+  }
+	emergency (...args) {
+    return this.logger.emergency(...args);
   }
 }
 

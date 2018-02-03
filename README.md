@@ -1,7 +1,7 @@
 
 # Super Logger
 
-An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage). 
+An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage).
 
 You can check the blueprint docs [here](https://docs.google.com/document/d/14yhGJDdrpyrpfUhlv2IQhqKwPftO5VA_YBvWIHJoFkY/edit?usp=sharing).
 
@@ -27,10 +27,10 @@ npm install
 you have to add *LOG_LEVEL* & *DB_LOG_LEVEL* to your environment.
 
 LOG_LEVEL is relevant to the lowest log level you'll see in your console.
-DB_LOG_LEVEL is relevant to the lowest log level you'll save in your database. 
+DB_LOG_LEVEL is relevant to the lowest log level you'll save in your database.
 These are the levels you can state [here](### Levels and console colors).
 
-Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels. 
+Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels.
 
 ## Docs
 ### Init Logger
@@ -62,8 +62,8 @@ logger = new Logger();
 ```
 > **Note:**
 
-> We used [winston-mongodb](https://github.com/winstonjs/winston-mongodb) as our mongodb transport and personalized it to our module by changing the log and query methods and by making it compatible to winston v3. 
-> The implementation and initialization is still the same. 
+> We used [winston-mongodb](https://github.com/winstonjs/winston-mongodb) as our mongodb transport and personalized it to our module by changing the log and query methods and by making it compatible to winston v3.
+> The implementation and initialization is still the same.
 
 ### Levels and console colors:
 The levels of Super Logger are:
@@ -118,9 +118,9 @@ let app = express();
 app.use(logger.expressLogging());
 ```
 On each call on your express api you'll have a block of log with the following settings:
-- logblock: [{url}-{method}-{uid}] 
+- logblock: [{url}-{method}-{uid}]
 - context: *EXPRESS*
-- type: 1 (REST_SERVER = 1, click [here](### Log types)) 
+- type: 1 (REST_SERVER = 1, click [here](### Log types))
 
 The log block will contain the following logs:
 - A log to inform you when the route was called (level info)
@@ -142,12 +142,12 @@ Whenever you make a request to an API or route you can log its:
 
 If the body response is an object, array or string it will be saved in your log content.
 
-If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.
+If the body response is in a html format, it will be saved in a html file under your log directory. The file name will be saved in your log content.  You can easily access these files on your browser on this url: /[logPrefix]/log-files/filename.html
 
 You'll have a block of log with the following settings:
-- logblock: [{url}-{method}-{uid}] 
+- logblock: [{url}-{method}-{uid}]
 - context: *REQUEST*
-- type: 2 (REST_CLIENT = 2, click [here](### Log types)) 
+- type: 2 (REST_CLIENT = 2, click [here](### Log types))
 
 #### callRequestLogging
 ```
@@ -179,7 +179,7 @@ request.get(url, (err, httpResponse, body) => {
 });
 ```
 ### Websocket logging
-Our module works with socket.io. On each web socket call, we log the event name and the data passed. 
+Our module works with socket.io. On each web socket call, we log the event name and the data passed.
 
 To init the web socket logging, do as following:
 ```
@@ -192,9 +192,9 @@ io.on('connection', (socket) => {
 });
 ```
 You'll have a block of log with the following settings:
-- logblock: [{eventName}-{uid}] 
+- logblock: [{eventName}-{uid}]
 - context: *WEBSOCKET*
-- type: 3 (WS = 3, click [here](### Log types)) 
+- type: 3 (WS = 3, click [here](### Log types))
 
 ### Logging API
 Our module provide two API endpoints to show logs. These 2 endpoints have a prefixed route that you can set or leave it with a default value "/".
@@ -235,3 +235,16 @@ The params you can pass on query to filter your logs:
 - level
 
 The logs are paginated starting with page 0.
+
+# Todos:
+  - create middleware for botbuilder like: [botbuilder-logging](http://www.npmjs.com/package/botbuilder-logging) or [botBuilder-samples](https://github.com/Microsoft/BotBuilder-Samples/tree/master/Node/capability-middlewareLogging)
+  - create script that runs a standalone express api
+  - set severity
+  - activate/desactivate Logging
+  - alert by email on specific level
+  - add unit testing
+  - add read html log files
+  - add read html log files
+  - fix bash colors
+  - fix powerShell magenta color
+  - pass shortId as optional to request logging.

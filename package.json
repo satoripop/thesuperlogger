@@ -15,6 +15,7 @@
   "dependencies": {
     "app-module-path": "2.2.0",
     "chalk": "2.3.0",
+    "circular": "1.0.5",
     "cycle": "1.0.3",
     "express": "4.16.2",
     "is-html": "1.1.0",
