@@ -114,7 +114,12 @@ logger.error(textError, value, objectError);
 ### Express logging
 Add the middleware of super-logger to your express api to get our cool well detailed logging.
 ```
+const = bodyParser = require('body-parser');
 let app = express();
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
+app.use(bodyParser.json());
 app.use(logger.expressLogging());
 ```
 On each call on your express api you'll have a block of log with the following settings:
