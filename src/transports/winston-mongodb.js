@@ -89,6 +89,9 @@ let MongoDB = exports.MongoDB = function(options) {
   if (!options.db) {
     throw new Error('You should provide db to log to.');
   }
+  this.on('error', (err) => {
+    console.error('super-logger(winston-mongodb), error on logging in database: ', err);
+  });
   this.name = options.name || 'mongodb';
   this.db = options.db;
   this.options = options.options;
@@ -99,7 +102,6 @@ let MongoDB = exports.MongoDB = function(options) {
     };
   }
   this.collection = (options.collection || 'log');
-  this.level = (options.level || 'info');
   this.silent = options.silent;
   this.storeHost = options.storeHost;
   this.label = options.label;
@@ -120,7 +122,7 @@ let MongoDB = exports.MongoDB = function(options) {
       processOpQueue();
     }, err=>{
       db.close();
-      console.error('winston-mongodb, initialization error: ', err);
+      console.error('super-logger(mongodb), initialization error: ', err);
     });
   }
   function processOpQueue() {
@@ -145,29 +147,28 @@ let MongoDB = exports.MongoDB = function(options) {
           if (info[0].expireAfterSeconds !== undefined &&
               info[0].expireAfterSeconds !== self.expireAfterSeconds) {
             return col.dropIndex(ttlIndexName)
-            .then(()=>col.createIndex({timestamp: -1}, indexOpts));
+            .then(()=>col.createIndex({timestamp: -1}, indexOpts))
+            .catch(err=>{console.error('super-logger(mongodb), fail to drop index: ', err)});
           }
         }
-      });
-    }).then(()=>db);
+      })
+      .catch(err => {console.error('super-logger(mongodb), fail to create index: ', err)});
+    })
+    .then(()=>db)
+    .catch(err => {console.error('super-logger(mongodb), fail to create collection: ', err)});
   }
   function connectToDatabase(logger) {
     return mongodb.MongoClient.connect(logger.db, logger.options
     ).then(setupDatabaseAndEmptyQueue, err=>{
-      console.error('winston-mongodb: error initialising logger', err);
-      if (options.tryReconnect) {
-        console.log('winston-mongodb: will try reconnecting in 10 seconds');
-        return new Promise(resolve=>setTimeout(resolve, 10000)
-        ).then(()=>connectToDatabase(logger));
-      }
+      console.error('super-logger(mongodb): error initialising logger', err);
     });
   }
 
   if ('string' === typeof this.db) {
     connectToDatabase(this);
   } else if ('function' === typeof this.db.then) {
-    this.db.then(setupDatabaseAndEmptyQueue, err=>console.error(
-        'winston-mongodb: error initialising logger from promise', err));
+    this.db.then(setupDatabaseAndEmptyQueue,
+      err=>{console.error('super-logger(mongodb): error initialising logger from promise', err)});
   } else { // preconnected object
     setupDatabaseAndEmptyQueue(this.db);
   }
@@ -218,7 +219,10 @@ MongoDB.prototype.log = function(info, cb) {
 
   if (!this.logDb) {
     this._opQueue.push({method: 'log', args: arguments});
-    return;
+    return true;
+  }
+  if(!cb) {
+    cb = () => {};
   }
   if(!meta.context){
     throw new Error('Each log should have a context.');
@@ -261,12 +265,14 @@ MongoDB.prototype.log = function(info, cb) {
       entry.label = this.label;
     }
 
-    this.logDb.collection(this.collection).insertOne(entry).then(()=>{
-      this.emit('logged');
-      cb(null, true);
-    }).catch(err=>{
-      this.emit('error', err);
-      cb(err);
+    this.logDb.collection(this.collection).insertOne(entry, (err) => {
+      if (err) {
+        this.emit('error', err);
+        cb(err);
+      } else {
+        this.emit('logged');
+        cb(null, true);
+      }
     });
   });
 };
