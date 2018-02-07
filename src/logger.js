@@ -18,6 +18,7 @@ const fs = require('fs');
 const isHtml = require('is-html');
 // our own modules
 const winstonMongo = require('./transports/winston-mongodb').MongoDB;
+const winstonMail = require('./transports/winston-mail').Mail;
 const winstonConsole = require('./transports/winston-console');
 const logTypes = require('./helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
@@ -55,6 +56,7 @@ class Logger {
     this.options = options;
     this.level = process.env.LOG_LEVEL || lowestLevel;
     this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
+    this.mailLevel = process.env.MAIL_LOG_LEVEL || lowestLevel;
 
     //create mongo transport
     const mongoTransport = new winstonMongo({
@@ -80,15 +82,18 @@ class Logger {
         format.simple()
       )
     });
+    let transports = [mongoTransport, consoleTransport];
+
+    //create email transport if wanted
+    if(!_.isEmpty(options.mailSettings)) {
+      Object.assign(options.mailSettings, {level: this.mailLevel})
+      const emailTransport = new winstonMail(options.mailSettings);
+      transports.push(emailTransport);
+    }
     //create winston logger
     this.logger = createLogger({
       levels,
-      transports: [
-        //create console transport for logger
-        consoleTransport,
-        //create mongo transport for logger
-        mongoTransport
-      ]
+      transports
     });
 
     //add level colors
