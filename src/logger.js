@@ -137,24 +137,23 @@ class Logger {
       };
       //log on call
       self.logger.info("EXPRESS CALL %s: %s", currentUrl, req.method, logMeta);
-
       //log params
-      if(!_.isEmpty(req.params)){
+      if (!_.isEmpty(req.params)) {
         let logMetaParams = Object.assign({}, logMeta, req.params);
         self.logger.info("Params: ", logMetaParams);
       }
 
       //log query
-      if(!_.isEmpty(req.query)){
+      if (!_.isEmpty(req.query)) {
         let logMetaQuery = Object.assign({}, logMeta, req.query);
         self.logger.info("Query: ", logMetaQuery);
       }
 
       //log body
-      if(!_.isEmpty(req.body)){
+      if (!_.isEmpty(req.body)) {
         let logMetaBody = Object.assign({}, logMeta, req.body);
         self.logger.info("Body Request: ", logMetaBody);
-      }else{
+      } else {
         self.logger.info("Body Request is empty ", logMeta);
       }
       let end = res.end;
