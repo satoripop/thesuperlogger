@@ -75,6 +75,7 @@ class Logger {
     //create console transport
     const consoleTransport = new winstonConsole({
       level: this.level,
+      handleExceptions: true,
       format: combine(
         colorize(),
         prettyPrint(),
@@ -82,20 +83,20 @@ class Logger {
         format.simple()
       )
     });
-    let transports = [mongoTransport, consoleTransport];
-
+    let transports = [consoleTransport, mongoTransport];
     //create email transport if wanted
     if(!_.isEmpty(options.mailSettings)) {
       Object.assign(options.mailSettings, {level: this.mailLevel})
-      const emailTransport = new winstonMail(options.mailSettings);
-      transports.push(emailTransport);
+      const mailTransport = new winstonMail(options.mailSettings);
+      this.mailTransport = mailTransport;
+      transports.unshift(mailTransport);
     }
     //create winston logger
     this.logger = createLogger({
       levels,
       transports
     });
-
+    this.logger.exitOnError = false;
     //add level colors
     addColors({
       levels,
@@ -114,12 +115,27 @@ class Logger {
    */
   logExceptions() {
     process.once('uncaughtException', err => {
-      this.logger.emergency('Server is down.', {
+      let noMongoLog = false;
+      if (err instanceof Error && err.name == "MongoError") {
+        noMongoLog = true;
+      }
+      let msg = 'Server is down.'
+      this.logger.emergency(msg, {
         context: "GENERAL",
         logblock: 'uncaughtException-' + shortid.generate(),
-        err
+        err,
+        noMongoLog
       });
-      process.exit(1);
+      if (this.mailTransport) {
+        this.mailTransport.on('logged', info => {
+          console.log('super-logger: mailTransport message', info);
+          if (info.message == msg) {
+            process.exit(1);
+          }
+        })
+      } else {
+        process.exit(1);
+      }
     });
   }
 

@@ -208,6 +208,14 @@ MongoDB.prototype.close = function() {
  * @param {Function} cb Continuation to respond to when complete.
  */
 MongoDB.prototype.log = function(info, cb) {
+  if (!this.logDb) {
+    this._opQueue.push({method: 'log', args: arguments});
+    return true;
+  }
+  if(!cb) {
+    cb = () => {};
+  }
+
   let meta;
   if (info.splat) {
     meta = Object.assign({}, info.meta);
@@ -217,13 +225,9 @@ MongoDB.prototype.log = function(info, cb) {
     delete meta.level;
   }
 
-  if (!this.logDb) {
-    this._opQueue.push({method: 'log', args: arguments});
-    return true;
-  }
-  if(!cb) {
-    cb = () => {};
-  }
+  if(meta.noMongoLog) cb(null, true);
+
+
   if(!meta.context){
     throw new Error('Each log should have a context.');
   }

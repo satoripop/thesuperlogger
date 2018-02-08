@@ -84,8 +84,9 @@ Mail.prototype.log = function(info, cb) {
     delete meta.splat;
     let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';
     message += info[LEVEL] + ': ';
-    subject += info.splat ? util.format(info.message, ...info.splat): info.message;
-    message += subject;
+    let msgSubject = info.splat ? util.format(info.message, ...info.splat): info.message;
+    subject += msgSubject
+    message += msgSubject;
     message = message.replace(/\u001b\[[0-9]{1,2}m/g, '');
     let metaObject = helpers.prepareMetaData(meta, true);
 
@@ -108,12 +109,12 @@ Mail.prototype.log = function(info, cb) {
     mailOptions.html = body
   }
   // send mail with defined transport object
-  this.transporter.sendMail(mailOptions, (error, info) => {
+  this.transporter.sendMail(mailOptions, (error, data) => {
     if (error) {
-      self.emit('error', err)
+      self.emit('error', error)
       return console.error(error);
     }
-    self.emit('logged');
+    self.emit('logged', info);
     try {
       cb(null, true)
     } catch (e) {
