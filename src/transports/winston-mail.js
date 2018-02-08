@@ -31,9 +31,8 @@ let Mail = exports.Mail = function(options) {
     throw new Error("super-logger(winston-email) requires 'transportOptions'")
   }
 
-  this.name = options.name || 'mail';
   this.to = options.to;
-  this.from = options.from || 'winston@' + os.hostname();
+  this.from = options.from || 'super-logger@' + os.hostname();
   this.subject = options.subject || '';
   this.html = options.html || false; // Send mail in html format
   this.formatter = options.formatter || false;
