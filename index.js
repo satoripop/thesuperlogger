@@ -2,6 +2,7 @@ require('app-module-path').addPath(__dirname + '/src');
 const ansi = require('chalk'),
   Logger = require('./src/logger'),
   express = require('express'),
+	bodyParser = require('body-parser'),
   request = require('request');
 
 const logger = new Logger();
@@ -20,6 +21,17 @@ logger.init({
   options: {
     poolSize: 2,
     autoReconnect: false
+  },
+  mailSettings: {
+    transportOptions: {
+      host: 'smtp.mailgun.org',
+      port: 25,
+      auth: {
+        user: 'postmaster@quicktext.im', // generated ethereal user
+        pass: 'c0b6cd3bcc40408799306668b2649ba0'  // generated ethereal password
+      }
+    },
+    to: "imen.ammar@satoripop.com"
   }
 });
 // app.listen(3005, () => {

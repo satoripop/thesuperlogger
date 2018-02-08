@@ -24,10 +24,11 @@ Install all npm packages.
 npm install
 ```
 ### SET env
-you have to add *LOG_LEVEL* & *DB_LOG_LEVEL* to your environment.
+you have to add *LOG_LEVEL* & *DB_LOG_LEVEL* & optionaly *MAIL_LOG_LEVEL* to your environment.
 
 LOG_LEVEL is relevant to the lowest log level you'll see in your console.
 DB_LOG_LEVEL is relevant to the lowest log level you'll save in your database.
+MAIL_LOG_LEVEL is relevant to the lowest log level you'll receive log emails.
 These are the levels you can state [here](### Levels and console colors).
 
 Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels.
@@ -47,8 +48,8 @@ logger.init({
   },
   db: "mongodb://localhost/my_database",
   logDir: './logs',
-  username: "my_username",
-  password: "my_password",
+  username: 'my_username',
+  password: 'my_password',
   options: {
     poolSize: 2,
     autoReconnect: true
@@ -201,6 +202,46 @@ You'll have a block of log with the following settings:
 - context: *WEBSOCKET*
 - type: 3 (WS = 3, click [here](### Log types))
 
+### Mail Logging
+You can receive mails from a certain level that you specify in your env var *MAIL_LOG_LEVEL*.
+Set your mail settings in the init method as follow:
+- transportOptions: options to create the email transporter
+  - host: SMTP server hostname
+  - port: SMTP port (default: 587 or 25)
+  - auth: to your email server
+    - username User for server auth
+    - password Password for server auth
+- to: The address(es) you want to send to. [required]
+- from: The address you want to send from. (default: super-logger@[server-host-name])
+- subject: Your mail subject
+- html: set to true if you use html in your formatter, false by default.
+- formatter: a method to format your email
+```
+  const formatter = (data) => {
+    let msg = util.format(data.message, ...data.splat);
+    let meta = data.meta;
+    return '<b>'+ msg +'</b>'
+  };
+  logger.init({
+    [...], //other settings
+    mailSettings: {
+      transportOptions: {
+        host: 'smtp.mail.com',
+        port: 456,
+        auth: {
+          user: 'my_mail@superlogger.com', // generated ethereal user
+          pass: 'my_password'  // generated ethereal password
+        }
+      },
+      to: 'imen.ammar@satoripop.com',
+      from: 'postmaster@quicktext.im',
+      subject: 'A mail subject',
+      html: true, //false by default
+      formatter: formatter // a method to format your mail
+    }
+  });
+```
+
 ### Logging API
 Our module provide two API endpoints to show logs. These 2 endpoints have a prefixed route that you can set or leave it with a default value "/".
 
@@ -242,14 +283,10 @@ The params you can pass on query to filter your logs:
 The logs are paginated starting with page 0.
 
 # Todos:
-  - create middleware for botbuilder like: [botbuilder-logging](http://www.npmjs.com/package/botbuilder-logging) or [botBuilder-samples](https://github.com/Microsoft/BotBuilder-Samples/tree/master/Node/capability-middlewareLogging)
   - create script that runs a standalone express api
   - set severity
   - activate/desactivate Logging
-  - alert by email on specific level
   - add unit testing
-  - add read html log files
-  - add read html log files
   - fix bash colors
   - fix powerShell magenta color
   - pass shortId as optional to request logging.

@@ -79,9 +79,6 @@ Console.prototype.log = function (info, callback) {
     self.emit('logged', info);
   });
 
-  //
-  // Remark: what if there is no raw...?
-  //
   let meta;
   if (info.splat) {
     meta = Object.assign({}, info.meta);
