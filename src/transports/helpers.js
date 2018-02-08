@@ -6,6 +6,7 @@
  */
 'use strict';
 const common = require('winston/lib/winston/common');
+const util = require('util');
 const ObjectID = require('mongodb').ObjectID;
 const cycle = require('cycle');
 
