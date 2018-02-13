@@ -36,41 +36,24 @@ class Logger {
 
   /**
    * init logger:
-   * create winston logger with console & mongodb transports,
-   * add wrapper functions for log levels
+   * create winston logger with console, mongodb and mail transports,
    * and add colors to log console levels
    * @param  {object} options logger mongo transport options
    */
   init (options){
-    options = (options || {});
+    this.options = (options || {});
 
     //create a log directory
-    if(!options.logDir){
+    if(!this.options.logDir){
       throw new Error("You need to specify a log directory in logDir property");
     }
-    this.logDir = options.logDir;
+    this.logDir = this.options.logDir;
     if (!fs.existsSync(this.logDir)){
       fs.mkdirSync(this.logDir);
     }
 
-    this.options = options;
-    this.level = process.env.LOG_LEVEL || lowestLevel;
-    this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
-    this.mailLevel = process.env.MAIL_LOG_LEVEL || lowestLevel;
 
-    //create mongo transport
-    const mongoTransport = new winstonMongo({
-      level: this.dbLevel,
-      db: this.options.db,
-      options: this.options.options,
-      username: this.options.username,
-      password: this.options.password,
-      keepAlive: 1000,
-      safe: true,
-      nativeParser: true,
-      decolorize: true
-    });
-    this.dbTransport = mongoTransport;
+    this.level = process.env.LOG_LEVEL || lowestLevel;
 
     //create console transport
     const consoleTransport = new winstonConsole({
@@ -83,12 +66,38 @@ class Logger {
         format.simple()
       )
     });
-    let transports = [consoleTransport, mongoTransport];
+    let transports = [consoleTransport];
+
+    //create mongo transport if wanted
+    if(!_.isEmpty(this.options.dbSettings)) {
+      this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
+
+      let dbSettings = this.options.dbSettings;
+
+      const mongoTransport = new winstonMongo({
+        level: this.dbLevel,
+        db: dbSettings.db,
+        options: dbSettings.options,
+        username: dbSettings.username,
+        password: dbSettings.password,
+        keepAlive: 1000,
+        safe: true,
+        nativeParser: true,
+        decolorize: true
+      });
+      this.dbTransport = mongoTransport;
+
+      transports.push(mongoTransport);
+    }
+
     //create email transport if wanted
-    if(!_.isEmpty(options.mailSettings)) {
-      Object.assign(options.mailSettings, {level: this.mailLevel})
-      const mailTransport = new winstonMail(options.mailSettings);
+    if(!_.isEmpty(this.options.mailSettings)) {
+      this.mailLevel = process.env.MAIL_LOG_LEVEL || lowestLevel;
+
+      Object.assign(this.options.mailSettings, {level: this.mailLevel})
+      const mailTransport = new winstonMail(this.options.mailSettings);
       this.mailTransport = mailTransport;
+
       transports.unshift(mailTransport);
     }
     //create winston logger
@@ -104,7 +113,7 @@ class Logger {
     });
 
     //launch express logging api
-    server(this, options.api);
+    server(this, this.options.api);
 
     //log uncaughtExceptions
     this.logExceptions();
