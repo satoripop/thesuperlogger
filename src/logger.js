@@ -109,11 +109,14 @@ class Logger {
       colors
     });
 
-    //launch express logging api
-    server(this, this.options.api);
+    if (this.dbTransport) {
+      //launch express logging api
+      server(this, this.options.api);
+    }
 
     //log uncaughtExceptions
-    this.logExceptions();
+    if(process.env.APP_ENV != 'test')
+      process.once('uncaughtException', err => this.logExceptions(this, err));
   }
 
   /**

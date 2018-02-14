@@ -103,12 +103,12 @@ Console.prototype.log = function (info, callback) {
   message += _.isEmpty(extras) ? '': JSON.stringify(extras);
 
   if (this.stderrLevels[info[LEVEL]]) {
-    process.stderr.write(message + this.eol + this.eol);
+    if(process.env.APP_ENV != "test") process.stderr.write(message + this.eol + this.eol);
     if (callback) { callback(); } // eslint-disable-line
     return;
   }
 
-  process.stdout.write(message + this.eol + this.eol);
+  if(process.env.APP_ENV != "test") process.stdout.write(message + this.eol + this.eol);
   if (callback) { callback(); } // eslint-disable-line
 };
 

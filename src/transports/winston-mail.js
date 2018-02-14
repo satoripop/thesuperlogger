@@ -108,6 +108,13 @@ Mail.prototype.log = function(info, cb) {
   if (this.html) {
     mailOptions.html = body
   }
+
+  // don't send mail in test env
+  if (process.env.APP_ENV == "test") {
+    self.emit('logged', info);
+    cb(null, true)
+    return true;
+  }
   // send mail with defined transport object
   this.transporter.sendMail(mailOptions, (error, data) => {
     if (error) {
