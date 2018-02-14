@@ -4,6 +4,7 @@ const ansi = require('chalk'),
   express = require('express'),
 	bodyParser = require('body-parser'),
   request = require('request');
+require('dotenv-extended').load();
 
 const logger = new Logger();
 let app = express();
