@@ -16,6 +16,7 @@ const _ = require('lodash');
 const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
+const EventEmitter = require('events');
 // our own modules
 const winstonMongo = require('./transports/winston-mongodb').MongoDB;
 const winstonMail = require('./transports/winston-mail').Mail;
@@ -134,30 +135,50 @@ class Logger {
   /**
    * log uncaught exceptions
    */
-  logExceptions() {
-    process.once('uncaughtException', err => {
-      let noMongoLog = false;
-      if (err instanceof Error && err.name == "MongoError") {
-        noMongoLog = true;
-      }
-      let msg = 'Server is down.'
-      this.logger.emergency(msg, {
-        context: "GENERAL",
-        logblock: 'uncaughtException-' + shortid.generate(),
-        err,
-        noMongoLog
-      });
-      if (this.mailTransport) {
-        this.mailTransport.on('logged', info => {
-          console.log('super-logger: mailTransport message', info);
-          if (info.message == msg) {
-            process.exit(1);
-          }
-        })
-      } else {
+  logExceptions(self, err) {
+    let noMongoLog = false;
+    if (err instanceof Error && err.name == "MongoError") {
+      noMongoLog = true;
+    }
+    let msg = 'Server is down.';
+    let logExpected = 0;
+    let logEmitted = 0;
+    let exitEmitter = new EventEmitter();
+    exitEmitter.on('exit', () => {
+      if(logEmitted == logExpected)
         process.exit(1);
-      }
     });
+
+    if (self.mailTransport) {
+      logExpected++;
+      self.mailTransport.on('logged', info => {
+        //console.log('super-logger: mailTransport message', info);
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+    if (self.dbTransport && !noMongoLog) {
+      logExpected++;
+      self.dbTransport.on('logged', info => {
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+
+    self.logger.emergency(msg, {
+      context: "GENERAL",
+      logblock: 'uncaughtException-' + shortid.generate(),
+      err,
+      noMongoLog
+    });
+
+    if(!self.mailTransport && (!self.dbTransport || (self.dbTransport && noMongoLog))) {
+      process.nextTick(() => { exitEmitter.emit('exit'); });
+    }
   }
 
   /**
