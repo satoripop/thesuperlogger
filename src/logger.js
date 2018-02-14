@@ -35,6 +35,18 @@ class Logger {
   }
 
   /**
+   * clear:
+   * destroy logger on next instantiation
+   */
+  clear(_this) {
+    let self = this || _this;
+    //process.removeListener('uncaughtException', self.logExceptions);
+    if (self.mailTransport) self.mailTransport.removeAllListeners();
+    if (self.dbTransport) self.dbTransport.removeAllListeners();
+    instance = null;
+  }
+
+  /**
    * init logger:
    * create winston logger with console, mongodb and mail transports,
    * and add colors to log console levels
