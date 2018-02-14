@@ -52,7 +52,6 @@ class Logger {
       fs.mkdirSync(this.logDir);
     }
 
-
     this.level = process.env.LOG_LEVEL || lowestLevel;
 
     //create console transport
@@ -78,8 +77,6 @@ class Logger {
         level: this.dbLevel,
         db: dbSettings.db,
         options: dbSettings.options,
-        username: dbSettings.username,
-        password: dbSettings.password,
         keepAlive: 1000,
         safe: true,
         nativeParser: true,

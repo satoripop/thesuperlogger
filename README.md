@@ -48,8 +48,6 @@ logger.init({
   },
   db: "mongodb://localhost/my_database",
   logDir: './logs',
-  username: 'my_username',
-  password: 'my_password',
   options: {
     poolSize: 2,
     autoReconnect: true
