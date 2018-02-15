@@ -25,7 +25,7 @@ var Console = module.exports = function (options) {
   options = options || {};
   TransportStream.call(this, options);
   this.stderrLevels = getStderrLevels(options.stderrLevels, options.debugStdout);
-  this.eol = options.eol || os.EOL;
+  this.eol = os.EOL;
 
   //
   // Convert stderrLevels into an Object for faster key-lookup times than an Array.
@@ -87,7 +87,6 @@ Console.prototype.log = function (info, callback) {
     delete meta.message;
     delete meta.level;
   }
-
   if(!meta.context){
     throw new Error('Each log should have a context.');
   }
@@ -111,12 +110,12 @@ Console.prototype.log = function (info, callback) {
   message += _.isEmpty(extras) ? '': JSON.stringify(extras);
 
   if (this.stderrLevels[info[LEVEL]]) {
-    if(process.env.APP_ENV != "test") process.stderr.write(message + this.eol + this.eol);
+    process.stderr.write(message + this.eol + this.eol);
     if (callback) { callback(); } // eslint-disable-line
     return;
   }
 
-  if(process.env.APP_ENV != "test") process.stdout.write(message + this.eol + this.eol);
+  process.stdout.write(message + this.eol + this.eol);
   if (callback) { callback(); } // eslint-disable-line
 };
 

@@ -1,5 +1,5 @@
 /**
- * @module testlogger
+ * @module test-logger
  * @fileoverview test file to test logger class
  * @license MIT
  * @author imen.ammar@satoripop.tn (Imen Ammar)
@@ -303,7 +303,7 @@ describe('logger listing log from database', () => {
       done();
     });
   })
-})
+});
 
 describe('logger level wrappers', () => {
   let logger = new Logger();
@@ -317,4 +317,4 @@ describe('logger level wrappers', () => {
   it('should throw an error if no context or logblock', () => {
     expect(() => { logger.info('test'); }).to.throw();
   });
-})
+});
