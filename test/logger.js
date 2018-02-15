@@ -304,3 +304,17 @@ describe('logger listing log from database', () => {
     });
   })
 })
+
+describe('logger level wrappers', () => {
+  let logger = new Logger();
+  logger.clear();
+  logger.init({
+    logDir: './logs',
+    dbSettings,
+    mailSettings,
+    api
+  });
+  it('should throw an error if no context or logblock', () => {
+    expect(() => { logger.info('test'); }).to.throw();
+  });
+})
