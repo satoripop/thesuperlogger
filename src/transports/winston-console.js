@@ -87,6 +87,14 @@ Console.prototype.log = function (info, callback) {
     delete meta.message;
     delete meta.level;
   }
+
+  if(!meta.context){
+    throw new Error('Each log should have a context.');
+  }
+  if(!meta.logblock){
+    throw new Error('Each log should be part of a logblock.');
+  }
+
   let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
   delete meta.logblock;
   delete meta.context;
