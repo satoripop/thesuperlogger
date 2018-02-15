@@ -111,9 +111,9 @@ describe('Console transport', () => {
     transports.stderrLevels,
     ['info', 'warn']
   ));
-});
 
-require('./abstract-transport')({
-  name: 'Console',
-  Transport: winstonConsole
+  require('./abstract-transport')({
+    name: 'Console',
+    Transport: winstonConsole
+  });
 });

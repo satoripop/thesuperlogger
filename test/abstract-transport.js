@@ -15,9 +15,10 @@ module.exports = (options) => {
 
   var Transport = options.Transport;
   var name = Transport.name || options.name;
+  var settings = options.settings || {};
   var instance;
   beforeEach(() => {
-    instance = new Transport();
+    instance = new Transport(settings);
   });
 
   describe('.log()', () => {
@@ -40,7 +41,7 @@ module.exports = (options) => {
       assert(true, result);
     });
 
-    it('(with callback) should return true', function (done) {
+    it('(with callback) should return true', (done) => {
     var info = {
       [LEVEL]: 'debug',
       level: 'debug',
@@ -58,8 +59,8 @@ module.exports = (options) => {
   });
 
   describe('events', () => {
-    it('should emit the "logged" event', function (done) {
-      instance.once('logged', function (info) {
+    it('should emit the "logged" event', (done) => {
+      instance.once('logged', (info) => {
         done()
       });
 
@@ -76,14 +77,14 @@ module.exports = (options) => {
     });
   });
 
-  afterEach(function (done) {
+  afterEach((done) => {
     if (options.afterEach) {
       return options.afterEach(options, done);
     }
     done();
   });
 
-  after(function (done) {
+  after((done) => {
     if (options.afterEach) {
       return options.afterEach(options, done);
     }
