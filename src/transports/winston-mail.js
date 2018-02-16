@@ -36,6 +36,7 @@ let Mail = exports.Mail = function(options) {
   this.subject = options.subject || '';
   this.html = options.html || false; // Send mail in html format
   this.formatter = options.formatter || false;
+  this.level = options.level;
 
   this.transporter = nodemailer.createTransport(
     options.transportOptions
@@ -65,7 +66,6 @@ Mail.prototype.log = function(info, cb) {
     if(cb) cb(null, true)
     return;
   }
-
 
   let body;
   let subject = level + ' ' + this.subject + ': ';
