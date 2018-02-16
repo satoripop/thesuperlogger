@@ -21,7 +21,7 @@ module.exports = (options) => {
     instance = new Transport(settings);
   });
 
-  describe('.log()', () => {
+  describe(name + ' .log()', () => {
     it('should be present', () => {
       assert.ok(instance.log);
       assert.equal('function', typeof instance.log);
@@ -58,7 +58,7 @@ module.exports = (options) => {
   });
   });
 
-  describe('events', () => {
+  describe(name + ' events', () => {
     it('should emit the "logged" event', (done) => {
       instance.once('logged', (info) => {
         done()

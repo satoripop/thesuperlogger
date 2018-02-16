@@ -318,7 +318,7 @@ MongoDB.prototype.query = function(opt_options, cb) {
   }
   let opt = {
     skip: options.start,
-    limit: options.rows,
+    limit: options.limit,
     sort: {timestamp: options.order === 'desc' ? -1 : 1}
   };
   if (options.fields) {

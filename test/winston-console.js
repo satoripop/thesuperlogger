@@ -56,7 +56,6 @@ describe('Console transport', () => {
       transports.defaults.levels = levels;
       Object.keys(levels)
         .forEach(function (level) {
-          console.log(level);
           const info = {
             [LEVEL]: level,
             message: `This is level ${level}`,

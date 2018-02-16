@@ -18,8 +18,6 @@ logger.init({
   },
   dbSettings: {
     db: "mongodb://localhost/rt_qt_database",
-    username: "",
-    password: "",
     options: {
       poolSize: 2,
       autoReconnect: false
