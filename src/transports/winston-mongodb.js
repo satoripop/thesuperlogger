@@ -224,9 +224,7 @@ MongoDB.prototype.log = function(info, cb) {
     delete meta.message;
     delete meta.level;
   }
-
-  if(meta.noMongoLog) cb(null, true);
-
+  if(meta.noMongoLog) return true;
 
   if(!meta.context){
     throw new Error('Each log should have a context.');
@@ -274,7 +272,7 @@ MongoDB.prototype.log = function(info, cb) {
         this.emit('error', err);
         cb(err);
       } else {
-        this.emit('logged');
+        this.emit('logged', info);
         cb(null, true);
       }
     });
@@ -320,7 +318,7 @@ MongoDB.prototype.query = function(opt_options, cb) {
   }
   let opt = {
     skip: options.start,
-    limit: options.rows,
+    limit: options.limit,
     sort: {timestamp: options.order === 'desc' ? -1 : 1}
   };
   if (options.fields) {

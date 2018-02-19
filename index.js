@@ -4,6 +4,7 @@ const ansi = require('chalk'),
   express = require('express'),
 	bodyParser = require('body-parser'),
   request = require('request');
+require('dotenv-extended').load();
 
 const logger = new Logger();
 let app = express();
@@ -17,8 +18,6 @@ logger.init({
   },
   dbSettings: {
     db: "mongodb://localhost/rt_qt_database",
-    username: "",
-    password: "",
     options: {
       poolSize: 2,
       autoReconnect: false

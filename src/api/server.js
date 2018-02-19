@@ -15,7 +15,7 @@ const { routes } = require('./routes');
  * @param  {string}  api.logPrefix  routes prifix for listing logs
  * @param  {integer} api.port       port for the express app
  */
-module.exports = (logger, api) => {
+module.exports = (logger, api = {}) => {
   let routesPrefix = api.logPrefix || '/';
   let logFilesPrefix = routesPrefix + '/log-files';
   const express = require('express');

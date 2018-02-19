@@ -36,6 +36,7 @@ let Mail = exports.Mail = function(options) {
   this.subject = options.subject || '';
   this.html = options.html || false; // Send mail in html format
   this.formatter = options.formatter || false;
+  this.level = options.level;
 
   this.transporter = nodemailer.createTransport(
     options.transportOptions
@@ -61,8 +62,10 @@ Transport.Mail = Mail;
 Mail.prototype.log = function(info, cb) {
   var self = this
   let level = info[LEVEL];
-  if (levels[level] != levels[lowestLevel] && levels[level] >= levels[this.level])
-    return cb(null, true);
+  if (levels[level] != levels[lowestLevel] && levels[level] >= levels[this.level]){
+    if(cb) cb(null, true)
+    return;
+  }
 
   let body;
   let subject = level + ' ' + this.subject + ': ';
@@ -77,6 +80,13 @@ Mail.prototype.log = function(info, cb) {
       delete meta.message;
       delete meta.level;
     }
+    if(!meta.context){
+      throw new Error('Each log should have a context.');
+    }
+    if(!meta.logblock){
+      throw new Error('Each log should be part of a logblock.');
+    }
+
     let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
     delete meta.logblock;
     delete meta.context;
@@ -108,6 +118,13 @@ Mail.prototype.log = function(info, cb) {
   if (this.html) {
     mailOptions.html = body
   }
+
+  // don't send mail in test env
+  if (process.env.APP_ENV == "test") {
+    self.emit('logged', info);
+    if(cb) cb(null, true)
+    return true;
+  }
   // send mail with defined transport object
   this.transporter.sendMail(mailOptions, (error, data) => {
     if (error) {
@@ -116,7 +133,8 @@ Mail.prototype.log = function(info, cb) {
     }
     self.emit('logged', info);
     try {
-      cb(null, true)
+      if(cb) cb(null, true)
+      return true;
     } catch (e) {
       console.error('super-logger(winston-email), Failed to send Email: ', e)
     }

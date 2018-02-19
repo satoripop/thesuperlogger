@@ -16,6 +16,7 @@ const _ = require('lodash');
 const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
+const EventEmitter = require('events');
 // our own modules
 const winstonMongo = require('./transports/winston-mongodb').MongoDB;
 const winstonMail = require('./transports/winston-mail').Mail;
@@ -35,6 +36,18 @@ class Logger {
   }
 
   /**
+   * clear:
+   * destroy logger on next instantiation
+   */
+  clear(_this) {
+    let self = this || _this;
+    //process.removeListener('uncaughtException', self.logExceptions);
+    if (self.mailTransport) self.mailTransport.removeAllListeners();
+    if (self.dbTransport) self.dbTransport.removeAllListeners();
+    instance = null;
+  }
+
+  /**
    * init logger:
    * create winston logger with console, mongodb and mail transports,
    * and add colors to log console levels
@@ -51,7 +64,6 @@ class Logger {
     if (!fs.existsSync(this.logDir)){
       fs.mkdirSync(this.logDir);
     }
-
 
     this.level = process.env.LOG_LEVEL || lowestLevel;
 
@@ -78,8 +90,6 @@ class Logger {
         level: this.dbLevel,
         db: dbSettings.db,
         options: dbSettings.options,
-        username: dbSettings.username,
-        password: dbSettings.password,
         keepAlive: 1000,
         safe: true,
         nativeParser: true,
@@ -111,41 +121,63 @@ class Logger {
       levels,
       colors
     });
-
-    //launch express logging api
-    server(this, this.options.api);
+    if (this.dbTransport && process.env.APP_ENV != 'test') {
+      //launch express logging api
+      server(this, this.options.api);
+    }
 
     //log uncaughtExceptions
-    this.logExceptions();
+    if(process.env.APP_ENV != 'test')
+      process.once('uncaughtException', err => this.logExceptions(this, err));
   }
 
   /**
    * log uncaught exceptions
    */
-  logExceptions() {
-    process.once('uncaughtException', err => {
-      let noMongoLog = false;
-      if (err instanceof Error && err.name == "MongoError") {
-        noMongoLog = true;
-      }
-      let msg = 'Server is down.'
-      this.logger.emergency(msg, {
-        context: "GENERAL",
-        logblock: 'uncaughtException-' + shortid.generate(),
-        err,
-        noMongoLog
-      });
-      if (this.mailTransport) {
-        this.mailTransport.on('logged', info => {
-          console.log('super-logger: mailTransport message', info);
-          if (info.message == msg) {
-            process.exit(1);
-          }
-        })
-      } else {
+  logExceptions(self, err) {
+    let noMongoLog = false;
+    if (err instanceof Error && err.name == "MongoError") {
+      noMongoLog = true;
+    }
+    let msg = 'Server is down.';
+    let logExpected = 0;
+    let logEmitted = 0;
+    let exitEmitter = new EventEmitter();
+    exitEmitter.on('exit', () => {
+      if(logEmitted == logExpected)
         process.exit(1);
-      }
     });
+
+    if (self.mailTransport) {
+      logExpected++;
+      self.mailTransport.on('logged', info => {
+        //console.log('super-logger: mailTransport message', info);
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+    if (self.dbTransport && !noMongoLog) {
+      logExpected++;
+      self.dbTransport.on('logged', info => {
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+
+    self.logger.emergency(msg, {
+      context: "GENERAL",
+      logblock: 'uncaughtException-' + shortid.generate(),
+      err,
+      noMongoLog
+    });
+
+    if(!self.mailTransport && (!self.dbTransport || (self.dbTransport && noMongoLog))) {
+      process.nextTick(() => { exitEmitter.emit('exit'); });
+    }
   }
 
   /**
