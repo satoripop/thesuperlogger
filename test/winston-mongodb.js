@@ -7,8 +7,6 @@
 const winstonMongo = require('../src/transports/winston-mongodb').MongoDB;
 const test_suite = require('./abstract-transport');
 const mongodb = require('mongodb');
-// const { LEVEL, MESSAGE } = require('triple-beam');
-// const shortid = require('shortid');
 const assert = require('assert');
 const chai = require('chai');
 const expect = chai.expect;

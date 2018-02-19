@@ -8,7 +8,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const Logger = require('../src/logger');
-const winstonMongo = require('../src/transports/winston-mongodb').MongoDB;
 const logTypes = require('../src/helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('../src/helpers/levelsSettings');
 const request = require('request');
