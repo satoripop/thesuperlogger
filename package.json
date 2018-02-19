@@ -37,6 +37,7 @@
     "request": "^2.83.0",
     "sinon": "^4.3.0",
     "socket.io": "^2.0.4",
-    "std-mocks": "^1.0.1"
+    "std-mocks": "^1.0.1",
+    "supertest": "^3.0.0"
   }
 }

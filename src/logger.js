@@ -121,8 +121,7 @@ class Logger {
       levels,
       colors
     });
-
-    if (this.dbTransport) {
+    if (this.dbTransport && process.env.APP_ENV != 'test') {
       //launch express logging api
       server(this, this.options.api);
     }
