@@ -18,20 +18,23 @@ const expect = chai.expect;
 require('dotenv-extended').load();
 
 describe('api routes', () => {
-  let logger = new Logger();
-  let port = 3025;
-  logger.clear();
-  logger.init({
-    dbSettings: {
-      db: "mongodb://localhost/test"
-    },
-    api:{ port },
-    logDir: './logs'
-  });
-  let app = express();
-  app.listen(port);
-  let request = supertest(app);
-  routes(logger, app, '/test');
+  let logger, request;
+  before(() => {
+    logger = new Logger();
+    let port = 3025;
+    logger.init({
+      dbSettings: {
+        db: "mongodb://localhost/test"
+      },
+      api:{ port },
+      logDir: './logs'
+    });
+    let app = express();
+    app.listen(port);
+    request = supertest(app);
+    routes(logger, app, '/test');
+  })
+
 
   it('should return logs from database', (done) => {
     const page = 0;

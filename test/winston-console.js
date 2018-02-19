@@ -22,9 +22,6 @@ const transports = {
   debugStdout: new winstonConsole({ debugStdout: true }),
   stderrLevels: new winstonConsole({
     stderrLevels: ['info', 'warn']
-  }),
-  syslog: new winstonConsole({
-    levels: winston.config.syslog.levels
   })
 };
 
@@ -51,11 +48,10 @@ describe('Console transport', () => {
     ));
 
     it('logs all levels (EXCEPT error and debug) to stdout', () => {
-
       stdMocks.use();
       transports.defaults.levels = levels;
       Object.keys(levels)
-        .forEach(function (level) {
+        .forEach((level) => {
           const info = {
             [LEVEL]: level,
             message: `This is level ${level}`,
@@ -73,7 +69,7 @@ describe('Console transport', () => {
       assume(output.stderr).is.an('array');
       assume(output.stderr).length(2);
       assume(output.stdout).is.an('array');
-      assume(output.stdout).length(14);
+      assume(output.stdout).length(6);
     });
   });
 
@@ -112,7 +108,7 @@ describe('Console transport', () => {
   ));
 
   require('./abstract-transport')({
-    name: 'Console',
+    name: '',
     Transport: winstonConsole
   });
 });

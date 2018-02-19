@@ -65,7 +65,7 @@ describe('Mail Transport', () => {
   });
 
   require('./abstract-transport')({
-    name: 'Mail',
+    name: '',
     Transport: winstonMail,
     settings: {
       transportOptions: {

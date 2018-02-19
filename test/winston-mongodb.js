@@ -20,7 +20,7 @@ describe('MongoDb Transport', () => {
   it('{db: url} should console error on wrong auth db settings', (done) => {
     let transport = new winstonMongo({
       db: "test"
-    })
+    });
     setTimeout(() => {
       expect( console.error.called ).to.be.true;
       expect( console.error.calledWith('super-logger(mongodb): error initialising logger'))

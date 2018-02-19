@@ -14,11 +14,14 @@ const expect = chai.expect;
 
 
 describe('api server', () => {
-  let logger = new Logger();
-  logger.clear();
-  logger.init({
-    logDir: './logs'
+  let logger;
+  before(() => {
+    logger = new Logger();
+    logger.init({
+      logDir: './logs'
+    });
   });
+
   it('should throw an error on no api settings', () => {
     expect(() => {
       server(logger);
