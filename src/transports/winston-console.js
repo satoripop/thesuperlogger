@@ -75,10 +75,6 @@ Console.prototype.name = 'console';
 Console.prototype.log = function (info, callback) {
   var self = this;
 
-  setImmediate(function () {
-    self.emit('logged', info);
-  });
-
   let meta;
   if (info.splat) {
     meta = Object.assign({}, info.meta);
@@ -88,15 +84,20 @@ Console.prototype.log = function (info, callback) {
     delete meta.level;
   }
   if(!meta.context){
-    throw new Error('Each log should have a context.');
+    throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
   }
   if(!meta.logblock){
     throw new Error('Each log should be part of a logblock.');
   }
 
+  setImmediate(function () {
+    self.emit('logged', info);
+  });
+
   let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
   delete meta.logblock;
   delete meta.context;
+  delete meta.noMongoLog;
   delete meta.type;
   delete meta.splat;
   let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';

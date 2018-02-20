@@ -76,8 +76,10 @@ class Logger {
         prettyPrint(),
         format.splat(),
         format.simple()
-      )
+      ),
+      handleExceptions: false
     });
+    this.consoleTransport = consoleTransport;
     let transports = [consoleTransport];
 
     //create mongo transport if wanted
@@ -93,7 +95,8 @@ class Logger {
         keepAlive: 1000,
         safe: true,
         nativeParser: true,
-        decolorize: true
+        decolorize: true,
+        handleExceptions: false
       });
       this.dbTransport = mongoTransport;
 
@@ -104,7 +107,10 @@ class Logger {
     if(!_.isEmpty(this.options.mailSettings)) {
       this.mailLevel = process.env.MAIL_LOG_LEVEL || lowestLevel;
 
-      Object.assign(this.options.mailSettings, {level: this.mailLevel})
+      Object.assign(this.options.mailSettings, {
+        level: this.mailLevel,
+        handleExceptions: false
+      });
       const mailTransport = new winstonMail(this.options.mailSettings);
       this.mailTransport = mailTransport;
 
@@ -113,9 +119,9 @@ class Logger {
     //create winston logger
     this.logger = createLogger({
       levels,
-      transports
+      transports,
+      exitOnError: false
     });
-    this.logger.exitOnError = false;
     //add level colors
     addColors({
       levels,
@@ -135,12 +141,13 @@ class Logger {
    * log uncaught exceptions
    */
   logExceptions(self, err) {
+    console.log(err);
     let noMongoLog = false;
     if (err instanceof Error && err.name == "MongoError") {
       noMongoLog = true;
     }
     let msg = 'Server is down.';
-    let logExpected = 0;
+    let logExpected = 1;
     let logEmitted = 0;
     let exitEmitter = new EventEmitter();
     exitEmitter.on('exit', () => {
@@ -151,7 +158,7 @@ class Logger {
     if (self.mailTransport) {
       logExpected++;
       self.mailTransport.on('logged', info => {
-        //console.log('super-logger: mailTransport message', info);
+        console.log('super-logger: mailTransport message', info);
         if (info.message == msg) {
           logEmitted++;
           process.nextTick(() => { exitEmitter.emit('exit'); });
@@ -175,9 +182,13 @@ class Logger {
       noMongoLog
     });
 
-    if(!self.mailTransport && (!self.dbTransport || (self.dbTransport && noMongoLog))) {
-      process.nextTick(() => { exitEmitter.emit('exit'); });
-    }
+    self.consoleTransport.on('logged', info => {
+      if (info.message == msg) {
+        logEmitted++;
+        process.nextTick(() => { exitEmitter.emit('exit'); });
+      }
+    })
+
   }
 
   /**

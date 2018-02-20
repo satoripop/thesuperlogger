@@ -81,7 +81,7 @@ Mail.prototype.log = function(info, cb) {
       delete meta.level;
     }
     if(!meta.context){
-      throw new Error('Each log should have a context.');
+      throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
     }
     if(!meta.logblock){
       throw new Error('Each log should be part of a logblock.');
@@ -90,6 +90,7 @@ Mail.prototype.log = function(info, cb) {
     let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
     delete meta.logblock;
     delete meta.context;
+    delete meta.noMongoLog;
     delete meta.type;
     delete meta.splat;
     let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';

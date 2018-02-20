@@ -227,7 +227,7 @@ MongoDB.prototype.log = function(info, cb) {
   if(meta.noMongoLog) return true;
 
   if(!meta.context){
-    throw new Error('Each log should have a context.');
+    throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
   }
   if(!meta.logblock){
     throw new Error('Each log should be part of a logblock.');
@@ -249,6 +249,7 @@ MongoDB.prototype.log = function(info, cb) {
       type
     };
     delete meta.context;
+    delete meta.noMongoLog;
     delete meta.logblock;
     delete meta.type;
     if(meta.source){
