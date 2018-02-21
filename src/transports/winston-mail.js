@@ -68,7 +68,8 @@ Mail.prototype.log = function(info, cb) {
   }
 
   let body;
-  let subject = level + ' ' + this.subject + ': ';
+  let env  = (process.env.APP_ENV || "prod").toUpperCase();
+  let subject = `${env} ${level} ${this.subject}: `;
   if (this.formatter) {
     body = this.formatter(info);
   } else {
