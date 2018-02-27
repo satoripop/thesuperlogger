@@ -281,9 +281,14 @@ The params you can pass on query to filter your logs:
 
 The logs are paginated starting with page 0.
 
+In case your app keeps crashing and you need to reach the log api you can run the script *standalone* to launch a standalone log api:
+```
+npm run standalone [PORT] [MONGO_DB_STRING] [LOG_PREFIX] [COLLECTION_NAME]
+
+```
+
+
 # Todos:
-  - create script that runs a standalone express api
-  - set severity
   - activate/desactivate Logging
   - fix bash colors
   - fix powerShell magenta color
