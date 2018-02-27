@@ -4,6 +4,24 @@ All notable changes to super-logger will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0-rc4] - 2018-02-27
+### Added
+- unit tests
+- env file for unit tests
+- clear logger instance
+- env to email subject
+- standalone script
+
+### Changed
+- logger settings in a more structured way
+
+### Fixed
+- log exceptions
+- mail transport callback calls
+
+### Removed
+- auto handle of exceptions
+
 ## [1.0.0-rc3] - 2018-02-09
 ### Added
 - Mail transport
