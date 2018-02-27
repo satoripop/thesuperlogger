@@ -25,7 +25,7 @@ var Console = module.exports = function (options) {
   options = options || {};
   TransportStream.call(this, options);
   this.stderrLevels = getStderrLevels(options.stderrLevels, options.debugStdout);
-  this.eol = options.eol || os.EOL;
+  this.eol = os.EOL;
 
   //
   // Convert stderrLevels into an Object for faster key-lookup times than an Array.
@@ -75,13 +75,6 @@ Console.prototype.name = 'console';
 Console.prototype.log = function (info, callback) {
   var self = this;
 
-  setImmediate(function () {
-    self.emit('logged', info);
-  });
-
-  //
-  // Remark: what if there is no raw...?
-  //
   let meta;
   if (info.splat) {
     meta = Object.assign({}, info.meta);
@@ -90,9 +83,21 @@ Console.prototype.log = function (info, callback) {
     delete meta.message;
     delete meta.level;
   }
+  if(!meta.context){
+    throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
+  }
+  if(!meta.logblock){
+    throw new Error('Each log should be part of a logblock.');
+  }
+
+  setImmediate(function () {
+    self.emit('logged', info);
+  });
+
   let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
   delete meta.logblock;
   delete meta.context;
+  delete meta.noMongoLog;
   delete meta.type;
   delete meta.splat;
   let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';

@@ -16,8 +16,10 @@ const _ = require('lodash');
 const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
+const EventEmitter = require('events');
 // our own modules
 const winstonMongo = require('./transports/winston-mongodb').MongoDB;
+const winstonMail = require('./transports/winston-mail').Mail;
 const winstonConsole = require('./transports/winston-console');
 const logTypes = require('./helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
@@ -34,88 +36,159 @@ class Logger {
   }
 
   /**
+   * clear:
+   * destroy logger on next instantiation
+   */
+  clear(_this) {
+    let self = this || _this;
+    //process.removeListener('uncaughtException', self.logExceptions);
+    if (self.mailTransport) self.mailTransport.removeAllListeners();
+    if (self.dbTransport) self.dbTransport.removeAllListeners();
+    instance = null;
+  }
+
+  /**
    * init logger:
-   * create winston logger with console & mongodb transports,
-   * add wrapper functions for log levels
+   * create winston logger with console, mongodb and mail transports,
    * and add colors to log console levels
    * @param  {object} options logger mongo transport options
    */
   init (options){
-    options = (options || {});
+    this.options = (options || {});
 
     //create a log directory
-    if(!options.logDir){
+    if(!this.options.logDir){
       throw new Error("You need to specify a log directory in logDir property");
     }
-    this.logDir = options.logDir;
+    this.logDir = this.options.logDir;
     if (!fs.existsSync(this.logDir)){
       fs.mkdirSync(this.logDir);
     }
 
-    this.options = options;
     this.level = process.env.LOG_LEVEL || lowestLevel;
-    this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
-
-    //create mongo transport
-    const mongoTransport = new winstonMongo({
-      level: this.dbLevel,
-      db: this.options.db,
-      options: this.options.options,
-      username: this.options.username,
-      password: this.options.password,
-      keepAlive: 1000,
-      safe: true,
-      nativeParser: true,
-      decolorize: true
-    });
-    this.dbTransport = mongoTransport;
 
     //create console transport
     const consoleTransport = new winstonConsole({
       level: this.level,
+      handleExceptions: true,
       format: combine(
         colorize(),
         prettyPrint(),
         format.splat(),
         format.simple()
-      )
+      ),
+      handleExceptions: false
     });
+    this.consoleTransport = consoleTransport;
+    let transports = [consoleTransport];
+
+    //create mongo transport if wanted
+    if(!_.isEmpty(this.options.dbSettings)) {
+      this.dbLevel = process.env.DB_LOG_LEVEL || lowestLevel;
+
+      let dbSettings = this.options.dbSettings;
+
+      const mongoTransport = new winstonMongo({
+        level: this.dbLevel,
+        db: dbSettings.db,
+        options: dbSettings.options,
+        keepAlive: 1000,
+        safe: true,
+        nativeParser: true,
+        decolorize: true,
+        handleExceptions: false
+      });
+      this.dbTransport = mongoTransport;
+
+      transports.push(mongoTransport);
+    }
+
+    //create email transport if wanted
+    if(!_.isEmpty(this.options.mailSettings)) {
+      this.mailLevel = process.env.MAIL_LOG_LEVEL || lowestLevel;
+
+      Object.assign(this.options.mailSettings, {
+        level: this.mailLevel,
+        handleExceptions: false
+      });
+      const mailTransport = new winstonMail(this.options.mailSettings);
+      this.mailTransport = mailTransport;
+
+      transports.unshift(mailTransport);
+    }
     //create winston logger
     this.logger = createLogger({
       levels,
-      transports: [
-        //create console transport for logger
-        consoleTransport,
-        //create mongo transport for logger
-        mongoTransport
-      ]
+      transports,
+      exitOnError: false
     });
-
     //add level colors
     addColors({
       levels,
       colors
     });
-
-    //launch express logging api
-    server(this, options.api);
+    if (this.dbTransport && process.env.APP_ENV != 'test') {
+      //launch express logging api
+      server(this, this.options.api);
+    }
 
     //log uncaughtExceptions
-    this.logExceptions();
+    if(process.env.APP_ENV != 'test')
+      process.once('uncaughtException', err => this.logExceptions(this, err));
   }
 
   /**
    * log uncaught exceptions
    */
-  logExceptions() {
-    process.once('uncaughtException', err => {
-      this.logger.emergency('Server is down.', {
-        context: "GENERAL",
-        logblock: 'uncaughtException-' + shortid.generate(),
-        err
-      });
-      process.exit(1);
+  logExceptions(self, err) {
+    console.log(err);
+    let noMongoLog = false;
+    if (err instanceof Error && err.name == "MongoError") {
+      noMongoLog = true;
+    }
+    let msg = 'Server is down.';
+    let logExpected = 1;
+    let logEmitted = 0;
+    let exitEmitter = new EventEmitter();
+    exitEmitter.on('exit', () => {
+      if(logEmitted == logExpected)
+        process.exit(1);
     });
+
+    if (self.mailTransport) {
+      logExpected++;
+      self.mailTransport.on('logged', info => {
+        console.log('super-logger: mailTransport message', info);
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+    if (self.dbTransport && !noMongoLog) {
+      logExpected++;
+      self.dbTransport.on('logged', info => {
+        if (info.message == msg) {
+          logEmitted++;
+          process.nextTick(() => { exitEmitter.emit('exit'); });
+        }
+      })
+    }
+
+    self.logger.emergency(msg, {
+      context: "GENERAL",
+      logblock: 'uncaughtException-' + shortid.generate(),
+      err,
+      noMongoLog
+    });
+
+    self.consoleTransport.on('logged', info => {
+      if (info.message == msg) {
+        logEmitted++;
+        process.nextTick(() => { exitEmitter.emit('exit'); });
+      }
+    })
+
   }
 
   /**

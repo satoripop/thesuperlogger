@@ -6,6 +6,7 @@
  */
 'use strict';
 const common = require('winston/lib/winston/common');
+const util = require('util');
 const ObjectID = require('mongodb').ObjectID;
 const cycle = require('cycle');
 
@@ -65,12 +66,24 @@ function cloneRefType(obj) {
  * @param {*} meta Metadata
  * @return {*}
  */
-exports.prepareMetaData = meta=>{
+exports.prepareMetaData = (meta, pretty = false) =>{
   if (typeof meta === 'object' && meta !== null) {
+    // Convert meta to string if it is an error.
+    if (meta instanceof Error) {
+      meta = {
+        message: meta.message,
+        name: meta.name,
+        stack: meta.stack,
+      }
+    }
     meta = makeObjectNonCircular(meta);
     cleanFieldNames(meta);
   }
   meta = clone(meta);
+
+  if (pretty && meta !== null && meta !== undefined && (typeof meta !== 'object' || Object.keys(meta).length > 0))
+    meta = util.inspect(meta, {depth: 5}) // Add some pretty printing.
+
   return meta;
 };
 
