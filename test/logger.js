@@ -303,10 +303,6 @@ describe('logger', ()=>{
         api
       });
     });
-
-    it('should throw an error if no context or logblock', () => {
-      expect(() => { logger.info('test'); }).to.throw();
-    });
   });
 
   afterEach(() => {
