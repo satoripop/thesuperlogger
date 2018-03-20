@@ -89,6 +89,7 @@ console.log(logger.logTypes);
 
 ### Pre-existing context:
 We use these context. But you can add your own as you please:
+- GENERAL: default value
 - REQUEST: for logs on api or url requests
 - EXPRESS: for logs on express route calls
 - WEBSOCKET: for logs on websocket (socket.io) event calls
@@ -96,7 +97,8 @@ We use these context. But you can add your own as you please:
 
 ### Base log:
 Depending on the level you want to use you just need to call the level method name.
-Each log has a context and is part of a logblock. Thus these fields are mandatory.
+Each log is part of a logblock. A auto generated logblock format is *[methodName|functionName|fileName]-[logblockId]*.
+You can pass your own logblock or logblockId.
 The source field is not required.
 ```
 textError = "hello %s !";
@@ -104,7 +106,7 @@ value = "world";
 objectError = {x: 2};
 Object.assign(objectError, {
   context: "MY_CONTEXT",
-  logblock: "test_block",
+  logblock: "test_block-123",
   source: "CLIENT_SIDE"
 })
 logger.error(textError, value, objectError);

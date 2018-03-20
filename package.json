@@ -24,6 +24,7 @@
     "mongoose": "4.13.3",
     "nodemailer": "^4.4.2",
     "shortid": "2.2.8",
+    "stack-trace": "0.0.10",
     "winston": "3.0.0-rc1"
   },
   "devDependencies": {

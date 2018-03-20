@@ -226,11 +226,11 @@ MongoDB.prototype.log = function(info, cb) {
   }
   if(meta.noMongoLog) return true;
 
-  if(!meta.context){
-    throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
-  }
-  if(!meta.logblock){
-    throw new Error('Each log should be part of a logblock.');
+  meta.context = meta.context || "GENERAL";
+  if (!meta.logblock) {
+    meta.logblock = `${meta.autoLogblock.logblockName}-${meta.autoLogblock.logblockId}`;
+  } else if (meta.logblockId) {
+    meta.logblock = `${meta.autoLogblock.logblockName}-${meta.logblockId}`;
   }
   let type = meta.type || logTypes.BASE;
 

@@ -81,11 +81,11 @@ Mail.prototype.log = function(info, cb) {
       delete meta.message;
       delete meta.level;
     }
-    if(!meta.context){
-      throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
-    }
-    if(!meta.logblock){
-      throw new Error('Each log should be part of a logblock.');
+    meta.context = meta.context || "GENERAL";
+    if (!meta.logblock) {
+      meta.logblock = `${meta.autoLogblock.logblockName}-${meta.autoLogblock.logblockId}`;
+    } else if (meta.logblockId) {
+      meta.logblock = `${meta.autoLogblock.logblockName}-${meta.logblockId}`;
     }
 
     let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});

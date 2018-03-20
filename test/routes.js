@@ -7,6 +7,7 @@
 
 const express = require('express');
 const Logger = require('../src/logger');
+const moment = require('moment');
 const { routes } = require('../src/api/routes');
 const winstonMongo = require('../src/transports/winston-mongodb').MongoDB;
 
@@ -43,11 +44,11 @@ describe('api routes', () => {
     const limit = start + pageSize;
     let fields = ['content', 'timestamp', 'context', 'logblock', 'type', 'level'];
     const options = {
-      from: new Date() - (30 * 24 * 60 * 60 * 1000),
-      until: new Date(),
+      from: moment().subtract(30, "days").toDate(),
+      until: moment().toDate(),
       limit,
       start,
-      order: 'desc',
+      order: 'asc',
       fields
     };
     logger.listLog(options)
@@ -57,6 +58,8 @@ describe('api routes', () => {
           .expect(200)
           .expect('Content-Type', /json/)
           .end(function(err, res) {
+            console.log(res.body);
+            console.log(results)
             expect(err).to.be.null;
             expect(res.body).to.be.an('array').that.have.lengthOf(results.length);
             res.body.every((log, i) => {
@@ -77,11 +80,11 @@ describe('api routes', () => {
     const limit = start + pageSize;
     let fields = ['content', 'timestamp', 'context', 'type', 'level'];
     const options = {
-      from: new Date() - (30 * 24 * 60 * 60 * 1000),
-      until: new Date(),
+      from: moment().subtract(30, "days").toDate(),
+      until: moment().toDate(),
       limit,
       start,
-      order: 'desc',
+      order: 'asc',
       fields,
       group: 'logblock'
     };

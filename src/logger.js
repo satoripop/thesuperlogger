@@ -17,6 +17,7 @@ const circular = require('circular');
 const fs = require('fs');
 const isHtml = require('is-html');
 const EventEmitter = require('events');
+const StackTrace = require('stack-trace');
 // our own modules
 const winstonMongo = require('./transports/winston-mongodb').MongoDB;
 const winstonMail = require('./transports/winston-mail').Mail;
@@ -426,30 +427,76 @@ class Logger {
     });
   }
 
+  getlogBlock () {
+    let strace = StackTrace.get()[2];
+    let logblockName = strace.getMethodName() || strace.getFunctionName() || strace.getFileName();
+    let logblockId = shortid.generate();
+    return {logblockName, logblockId};
+  }
 
   //add wrapper functions for levels
   debug (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.debug(...args);
   }
 	info (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.info(...args);
   }
 	notice (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.notice(...args);
   }
 	warning (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.warning(...args);
   }
 	error (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.error(...args);
   }
 	critical (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.critical(...args);
   }
 	alert (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.alert(...args);
   }
 	emergency (...args) {
+    if (typeof args[args.length - 1] == 'object') {
+      args[args.length - 1].autoLogblock = this.getlogBlock();
+    } else {
+      throw "No meta object"
+    }
     return this.logger.emergency(...args);
   }
 }
