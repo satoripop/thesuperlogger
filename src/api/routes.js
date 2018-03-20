@@ -5,6 +5,8 @@
  * @author Ghassen Rjab <ghassen.rjab@satoripop.com>
  */
 
+const moment = require('moment');
+
 /**
  * api routes to get logs
  * @param  {object} logger logger instance
@@ -15,21 +17,30 @@ module.exports.routes = (logger, app, routesPrefix) => {
   // Main route
   const mainRoute = `${routesPrefix}`;
   app.get(mainRoute, (req, res) => {
-    let { context, logblock, type, level, page } = req.query;
+    let { context, logblock, type, level, page, until, from, order } = req.query;
+
+    let validUntil = until && moment(until).isValid();
+    let _until = validUntil ? moment(until).toDate() : moment().toDate();
+
+    let validFrom = from && moment(from).isValid() &&  moment(until).isAfter(moment(from));
+    let _from = validFrom ? moment(from).toDate() : moment(until).subtract(30, "days").toDate();
+
+    order = order || 1;
+
     page = page || 0;
     const pageSize = 10;
     const start = page * pageSize;
     const limit = start + pageSize;
     const options = {
-      from: new Date() - (30 * 24 * 60 * 60 * 1000),
-      until: new Date(),
+      from: _from,
+      until: _until,
       limit,
       start,
       context,
       logblock,
       type,
       level,
-      order: 'desc',
+      order: parseInt(order) >= 0 ? 'asc' : 'desc',
       fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level']
     };
     logger.listLog(options)
