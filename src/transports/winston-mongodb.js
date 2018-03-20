@@ -303,11 +303,11 @@ MongoDB.prototype.query = function(opt_options, cb) {
   };
   // filter by context
   if(options.context){
-    Object.assign(query, {context: options.context});
+    Object.assign(query, {context: {$regex : `.*${options.context}.*`}});
   }
   // filter by logblock
   if(options.logblock){
-    Object.assign(query, {logblock: options.logblock});
+    Object.assign(query, {logblock: {$regex : `.*${options.logblock}.*`}});
   }
   // filter by type
   if(options.type){
