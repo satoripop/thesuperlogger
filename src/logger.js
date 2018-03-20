@@ -26,6 +26,11 @@ const logTypes = require('./helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
 
+const supportsColor = require('supports-color');
+if (supportsColor.stdout) {
+	console.log('Terminal stdout supports color');
+}
+
 let instance = null;
 class Logger {
   constructor() {
