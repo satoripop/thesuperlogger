@@ -17,13 +17,13 @@ const helpers = require('./helpers');
 const {colors} = require('../helpers/levelsSettings');
 const _ = require('lodash');
 
-const ansi = new chalk.constructor({level: 0});
+let ansi = new chalk.constructor({level: 0});
 if (supportsColor.stderr.has16m) {
-	const ansi = new chalk.constructor({level: 3});
+	ansi = new chalk.constructor({level: 3});
 } else if (supportsColor.stdout.has256) {
-	const ansi = new chalk.constructor({level: 2});
+	ansi = new chalk.constructor({level: 2});
 } else if (supportsColor.stdout) {
-	const ansi = new chalk.constructor({level: 1});
+	ansi = new chalk.constructor({level: 1});
 }
 
 //
