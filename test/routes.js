@@ -58,8 +58,6 @@ describe('api routes', () => {
 					.expect(200)
 					.expect('Content-Type', /json/)
 					.end(function(err, res) {
-						console.log(res.body);
-						console.log(results);
 						expect(err).to.be.null;
 						expect(res.body).to.be.an('array').that.have.lengthOf(results.length);
 						res.body.every((log, i) => {

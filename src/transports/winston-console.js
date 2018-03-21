@@ -96,9 +96,7 @@ Console.prototype.log = function (info, callback) {
 	}
 	meta.context = meta.context || 'GENERAL';
 	if (!meta.logblock) {
-		meta.logblock = `${meta.autoLogblock.logblockName}-${meta.autoLogblock.logblockId}`;
-	} else if (meta.logblockId) {
-		meta.logblock = `${meta.autoLogblock.logblockName}-${meta.logblockId}`;
+		throw 'super-logger: a logblock is mandatory';
 	}
 
 	setImmediate(function () {

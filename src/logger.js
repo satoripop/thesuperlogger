@@ -40,6 +40,10 @@ class Logger {
 	constructor() {
 		if (!instance) {
 			this.logTypes = logTypes;
+			let Logblock = require('./logblock')(this);
+			this.Logblock = Logblock.Instance;
+			this.getLogblock = Logblock.getLogblock;
+			this.setLogblock = Logblock.setLogblock;
 			instance = this;
 		}
 		return instance;
@@ -434,76 +438,37 @@ class Logger {
 		});
 	}
 
-	getlogBlock () {
-		let strace = StackTrace.get()[2];
-		let logblockName = strace.getMethodName() || strace.getFunctionName() || strace.getFileName();
-		let logblockId = shortid.generate();
-		return {logblockName, logblockId};
-	}
-
 	//add wrapper functions for levels
 	debug (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.debug(...args);
 	}
 	info (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.info(...args);
 	}
 	notice (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.notice(...args);
 	}
 	warning (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.warning(...args);
 	}
 	error (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.error(...args);
 	}
 	critical (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.critical(...args);
 	}
 	alert (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.alert(...args);
 	}
 	emergency (...args) {
-		if (typeof args[args.length - 1] == 'object') {
-			args[args.length - 1].autoLogblock = this.getlogBlock();
-		} else {
-			throw 'No meta object';
-		}
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.emergency(...args);
 	}
 }

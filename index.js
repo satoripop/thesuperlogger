@@ -39,9 +39,11 @@ logger.init({
 // app.listen(3005, () => {
 // });
 //console.log(JSON.stringify(logger.logTypes));
+//
+let logblock = new logger.Logblock('index.js');
 const testFunction = () => {
 	let string = 'hey ' + ansi.grey('you') + ' %s %s!';
-	logger.error(string, 'yutut', {test: 1}, {context: 'NODE', logblock: 'block1', x: 2, y: {c: 5}});
+	logblock.error(string, 'yutut', {test: 1}, {context: 'NODE', x: 2, y: {c: 5}});
 };
 // testFunction();
 // testFunction();
@@ -60,9 +62,12 @@ Promise.all([testFunction(), testFunction()]);
 // });
 //
 let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
+logger.info("I'm one of a kind", {logblock: "yo"});
+logger.info("I'm lifeless",);
 logger.callRequestLogging(url, 'get', {}, true);
 request.get(url, (err, httpResponse, body) => {
 	logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+	logblock.info('all part of the same shit!');
 });
 //
 // io = require('socket.io')(3000);
