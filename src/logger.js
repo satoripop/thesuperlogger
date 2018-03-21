@@ -9,7 +9,8 @@
 const { createLogger, format, transports, addColors, add } = require('winston');
 const { combine, prettyPrint, colorize} = format;
 // dependency modules
-const ansi = require('chalk');
+const chalk = require('chalk');
+const supportsColor = require('supports-color');
 const moment = require('moment');
 const shortid = require('shortid');
 const _ = require('lodash');
@@ -25,6 +26,15 @@ const winstonConsole = require('./transports/winston-console');
 const logTypes = require('./helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
+
+let ansi = new chalk.constructor({level: 0});
+if (supportsColor.stderr.has16m) {
+	ansi = new chalk.constructor({level: 3});
+} else if (supportsColor.stdout.has256) {
+	ansi = new chalk.constructor({level: 2});
+} else if (supportsColor.stdout) {
+	ansi = new chalk.constructor({level: 1});
+}
 
 let instance = null;
 class Logger {
@@ -286,7 +296,7 @@ class Logger {
     if(api){
       msg = apiCallMsg + msg;
     }
-    this.logger.info(msg, ansi.magenta(`${url}: ${method}`), logMeta);
+    this.logger.info(msg, ansi.blue(`${url}: ${method}`), logMeta);
 
     //log request query
     let queryString = (url.split('?'))[1];
@@ -344,7 +354,7 @@ class Logger {
       let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
         ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
         ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
-      this.logger.log(level, msg, status, ansi.magenta(`${url}: ${method}`), logMeta);
+      this.logger.log(level, msg, status, ansi.blue(`${url}: ${method}`), logMeta);
       //log file containing html body
       if (isHtml(body)) {
         let data = body.toString();

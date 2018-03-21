@@ -8,13 +8,24 @@
 
 const os = require('os');
 const util = require('util');
-const ansi = require('chalk');
+const chalk = require('chalk');
+const supportsColor = require('supports-color');
 const moment = require('moment');
 const { LEVEL, MESSAGE } = require('triple-beam');
 const TransportStream = require('winston-transport');
 const helpers = require('./helpers');
 const {colors} = require('../helpers/levelsSettings');
 const _ = require('lodash');
+
+let ansi = new chalk.constructor({level: 0});
+if (supportsColor.stderr.has16m) {
+	ansi = new chalk.constructor({level: 3});
+} else if (supportsColor.stdout.has256) {
+	ansi = new chalk.constructor({level: 2});
+} else if (supportsColor.stdout) {
+	ansi = new chalk.constructor({level: 1});
+}
+
 //
 // ### function Console (options)
 // #### @options {Object} Options for this instance.

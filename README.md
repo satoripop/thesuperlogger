@@ -292,6 +292,3 @@ npm run standalone [PORT] [MONGO_DB_STRING] [LOG_PREFIX] [COLLECTION_NAME]
 
 # Todos:
   - activate/desactivate Logging
-  - fix bash colors
-  - fix powerShell magenta color
-  - pass shortId as optional to request logging.
