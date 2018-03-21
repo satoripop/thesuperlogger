@@ -11,83 +11,83 @@ const { LEVEL, MESSAGE } = require('triple-beam');
 const shortid = require('shortid');
 
 module.exports = (options) => {
-  options = options || {};
+	options = options || {};
 
-  var Transport = options.Transport;
-  var name = Transport.name || options.name;
-  var settings = options.settings || {};
-  var instance;
-  beforeEach(() => {
-    instance = new Transport(settings);
-  });
+	var Transport = options.Transport;
+	var name = Transport.name || options.name;
+	var settings = options.settings || {};
+	var instance;
+	beforeEach(() => {
+		instance = new Transport(settings);
+	});
 
-  describe(name + ' .log()', () => {
-    it('should be present', () => {
-      assert.ok(instance.log);
-      assert.equal('function', typeof instance.log);
-    });
+	describe(name + ' .log()', () => {
+		it('should be present', () => {
+			assert.ok(instance.log);
+			assert.equal('function', typeof instance.log);
+		});
 
-    it('(with no callback) should return true', () => {
-      var info = {
-        [LEVEL]: 'debug',
-        level: 'debug',
-        message: 'foo',
-        context: 'TEST',
-        logblock: 'test-block-' + shortid.generate()
-      };
+		it('(with no callback) should return true', () => {
+			var info = {
+				[LEVEL]: 'debug',
+				level: 'debug',
+				message: 'foo',
+				context: 'TEST',
+				logblock: 'test-block-' + shortid.generate(),
+			};
 
-      info[MESSAGE] = JSON.stringify(info);
-      var result = instance.log(info);
-      assert(true, result);
-    });
+			info[MESSAGE] = JSON.stringify(info);
+			var result = instance.log(info);
+			assert(true, result);
+		});
 
-    it('(with callback) should return true', (done) => {
-    var info = {
-      [LEVEL]: 'debug',
-      level: 'debug',
-      message: 'foo',
-      context: 'TEST',
-      logblock: 'test-block-' + shortid.generate()
-    };
+		it('(with callback) should return true', (done) => {
+			var info = {
+				[LEVEL]: 'debug',
+				level: 'debug',
+				message: 'foo',
+				context: 'TEST',
+				logblock: 'test-block-' + shortid.generate(),
+			};
 
-    info[MESSAGE] = JSON.stringify(info);
-    var result = instance.log(info, () => {
-      assert(true, result);
-      done();
-    });
-  });
-  });
+			info[MESSAGE] = JSON.stringify(info);
+			var result = instance.log(info, () => {
+				assert(true, result);
+				done();
+			});
+		});
+	});
 
-  describe(name + ' events', () => {
-    it('should emit the "logged" event', (done) => {
-      instance.once('logged', (info) => {
-        done()
-      });
+	describe(name + ' events', () => {
+		it('should emit the "logged" event', (done) => {
+			instance.once('logged', (info) => {
+				done();
+			});
 
-      var info = {
-        [LEVEL]: 'debug',
-        level: 'debug',
-        message: 'foo',
-        context: 'TEST',
-        logblock: 'test-block-' + shortid.generate()
-      };
+			var info = {
+				[LEVEL]: 'debug',
+				level: 'debug',
+				message: 'foo',
+				context: 'TEST',
+				logblock: 'test-block-' + shortid.generate(),
+			};
 
-      info[MESSAGE] = JSON.stringify(info);
-      instance.log(info);
-    });
-  });
+			info[MESSAGE] = JSON.stringify(info);
+			instance.log(info);
+		});
+	});
 
-  afterEach((done) => {
-    if (options.afterEach) {
-      return options.afterEach(options, done);
-    }
-    done();
-  });
+	afterEach((done) => {
+		if (options.afterEach) {
+			return options.afterEach(options, done);
+		}
+		done();
+	});
 
-  after((done) => {
-    if (options.afterEach) {
-      return options.afterEach(options, done);
-    }
-    done();
-  });
-}
+	after((done) => {
+		if (options.afterEach) {
+			return options.afterEach(options, done);
+		}
+		done();
+	});
+};

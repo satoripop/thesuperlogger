@@ -1,48 +1,48 @@
 require('app-module-path').addPath(__dirname + '/src');
 const ansi = require('chalk'),
-  Logger = require('./src/logger'),
-  express = require('express'),
+	Logger = require('./src/logger'),
+	express = require('express'),
 	bodyParser = require('body-parser'),
-  request = require('request');
+	request = require('request');
 require('dotenv-extended').load();
 
 const logger = new Logger();
 let app = express();
 
 logger.init({
-  logDir: './logs',
-  api: {
-    //port: 3015,
-    appExpress: app,
-    logPrefix: '/logs',
-  },
-  // dbSettings: {
-  //   db: "mongodb://localhost/rt_qt_database",
-  //   options: {
-  //     poolSize: 2,
-  //     autoReconnect: false
-  //   }
-  // },
-  // mailSettings: {
-  //   transportOptions: {
-  //     host: 'smtp.mailgun.org',
-  //     port: 25,
-  //     auth: {
-  //       user: 'postmaster@quicktext.im', // generated ethereal user
-  //       pass: 'c0b6cd3bcc40408799306668b2649ba0'  // generated ethereal password
-  //     }
-  //   },
-  //   to: "imen.ammar@satoripop.com",
-  //   from: 'postmaster@quicktext.im'
-  // }
+	logDir: './logs',
+	api: {
+		//port: 3015,
+		appExpress: app,
+		logPrefix: '/logs',
+	},
+	// dbSettings: {
+	//   db: "mongodb://localhost/rt_qt_database",
+	//   options: {
+	//     poolSize: 2,
+	//     autoReconnect: false
+	//   }
+	// },
+	// mailSettings: {
+	//   transportOptions: {
+	//     host: 'smtp.mailgun.org',
+	//     port: 25,
+	//     auth: {
+	//       user: 'postmaster@quicktext.im', // generated ethereal user
+	//       pass: 'c0b6cd3bcc40408799306668b2649ba0'  // generated ethereal password
+	//     }
+	//   },
+	//   to: "imen.ammar@satoripop.com",
+	//   from: 'postmaster@quicktext.im'
+	// }
 });
 // app.listen(3005, () => {
 // });
 //console.log(JSON.stringify(logger.logTypes));
 const testFunction = () => {
-  let string = "hey " + ansi.grey("you") + " %s %s!";
-  logger.error(string, "yutut", {test: 1}, {context: "NODE", logblock: "block1", x: 2, y: {c: 5}});
-}
+	let string = 'hey ' + ansi.grey('you') + ' %s %s!';
+	logger.error(string, 'yutut', {test: 1}, {context: 'NODE', logblock: 'block1', x: 2, y: {c: 5}});
+};
 // testFunction();
 // testFunction();
 
@@ -59,10 +59,10 @@ Promise.all([testFunction(), testFunction()]);
 // app.listen(3005, () => {
 // });
 //
-let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";
+let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
 logger.callRequestLogging(url, 'get', {}, true);
 request.get(url, (err, httpResponse, body) => {
-  logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+	logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
 });
 //
 // io = require('socket.io')(3000);
