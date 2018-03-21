@@ -297,7 +297,7 @@ class Logger {
     if(api){
       msg = apiCallMsg + msg;
     }
-    this.logger.info(msg, ansi.magenta(`${url}: ${method}`), logMeta);
+    this.logger.info(msg, ansi.blue(`${url}: ${method}`), logMeta);
 
     //log request query
     let queryString = (url.split('?'))[1];
@@ -355,7 +355,7 @@ class Logger {
       let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
         ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
         ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
-      this.logger.log(level, msg, status, ansi.magenta(`${url}: ${method}`), logMeta);
+      this.logger.log(level, msg, status, ansi.blue(`${url}: ${method}`), logMeta);
       //log file containing html body
       if (isHtml(body)) {
         let data = body.toString();
