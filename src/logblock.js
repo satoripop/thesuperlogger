@@ -16,7 +16,7 @@ module.exports = (logger) => {
 		let logblockId = shortid.generate();
 		return `${logblockName}-${logblockId}`;
 	};
-	const setLogblog = (args, name) => {
+	const setLogblock = (args, name) => {
 		if (typeof args[args.length - 1] == 'object') {
 			args[args.length - 1].logblock = args[args.length - 1].logblock || name;
 		} else {
@@ -34,50 +34,50 @@ module.exports = (logger) => {
 			}
 		}
 
-		setLogblog(args){
+		setLogblock(args){
 			if (typeof args[args.length - 1] == 'object') {
 				delete args[args.length - 1].logblock;
 			}
-			return setLogblog(args, this.name);
+			return setLogblock(args, this.name);
 		}
 
 		//add wrapper functions for levels
 		debug (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.debug(...args);
 		}
 		info (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.info(...args);
 		}
 		notice (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.notice(...args);
 		}
 		warning (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.warning(...args);
 		}
 		error (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.error(...args);
 		}
 		critical (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.critical(...args);
 		}
 		alert (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.alert(...args);
 		}
 		emergency (...args) {
-			args = this.setLogblog(args);
+			args = this.setLogblock(args);
 			return logger.emergency(...args);
 		}
 	}
 	return {
 		Instance : Logblock,
 		getLogblock,
-		setLogblog,
+		setLogblock,
 	};
 }

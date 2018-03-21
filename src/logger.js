@@ -40,10 +40,10 @@ class Logger {
 	constructor() {
 		if (!instance) {
 			this.logTypes = logTypes;
-			let Logblock = require('logblock')(this);
+			let Logblock = require('./logblock')(this);
 			this.Logblock = Logblock.Instance;
 			this.getLogblock = Logblock.getLogblock;
-			this.setLogblog = Logblock.setLogblog;
+			this.setLogblock = Logblock.setLogblock;
 			instance = this;
 		}
 		return instance;
@@ -440,35 +440,35 @@ class Logger {
 
 	//add wrapper functions for levels
 	debug (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.debug(...args);
 	}
 	info (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.info(...args);
 	}
 	notice (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.notice(...args);
 	}
 	warning (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.warning(...args);
 	}
 	error (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.error(...args);
 	}
 	critical (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.critical(...args);
 	}
 	alert (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.alert(...args);
 	}
 	emergency (...args) {
-		args = this.setLogblog(args, this.getLogblock());
+		args = this.setLogblock(args, this.getLogblock());
 		return this.logger.emergency(...args);
 	}
 }
