@@ -1,0 +1,51 @@
+{
+  "env": {
+    "commonjs": true,
+    "es6": true,
+    "node": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "rules": {
+    "indent": [
+      "error",
+      "tab"
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+		"comma-dangle": [
+			"error",
+			"always-multiline"
+		],
+    "no-console": [
+      "off"
+    ],
+		"no-unused-vars": [
+      "off",
+      {
+        "vars": "all",
+        "args": "none"
+      }
+    ]
+  },
+	"globals": {
+		"describe": true,
+		"it": true,
+		"beforeEach": true,
+		"afterEach": true,
+		"before": true,
+		"after": true
+	}
+}
