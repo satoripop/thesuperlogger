@@ -83,9 +83,7 @@ Mail.prototype.log = function(info, cb) {
 		}
 		meta.context = meta.context || 'GENERAL';
 		if (!meta.logblock) {
-			meta.logblock = `${meta.autoLogblock.logblockName}-${meta.autoLogblock.logblockId}`;
-		} else if (meta.logblockId) {
-			meta.logblock = `${meta.autoLogblock.logblockName}-${meta.logblockId}`;
+			throw "super-logger: a logblock is mandatory";
 		}
 
 		let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
