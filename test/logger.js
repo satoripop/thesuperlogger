@@ -298,35 +298,34 @@ describe('logger', ()=>{
 	describe('logger level wrappers', () => {
 		it('should contain log wrapeprs', () => {
 			function hasMethod (obj, name) {
-			  const desc = Object.getOwnPropertyDescriptor (obj, name);
-			  return typeof desc.value === 'function';
+				const desc = Object.getOwnPropertyDescriptor (obj, name);
+				return typeof desc.value === 'function';
 			}
 			function getInstanceMethodNames (obj) {
-			  let array = [];
-			  let proto = Object.getPrototypeOf (obj);
+				let array = [];
+				let proto = Object.getPrototypeOf (obj);
 				let stop = false;
-			  while (proto && !stop) {
-			    Object.getOwnPropertyNames (proto)
-			      .forEach (name => {
-							if( name == "emergency") stop = true;
-			        if (name !== 'constructor') {
-			          if (hasMethod (proto, name)) {
-			            array.push (name);
-			          }
-			        }
-			      });
-			    proto = Object.getPrototypeOf (proto);
-			  }
-			  return array;
+				while (proto && !stop) {
+					Object.getOwnPropertyNames (proto).forEach (name => {
+						if( name == 'emergency') stop = true;
+						if (name !== 'constructor') {
+							if (hasMethod (proto, name)) {
+								array.push (name);
+							}
+						}
+					});
+					proto = Object.getPrototypeOf (proto);
+				}
+				return array;
 			}
 			let methods = getInstanceMethodNames(logger);
 			let expectedMethods = [];
-			for (level in levels) {
+			for (let level in levels) {
 				expectedMethods.push(level);
 			}
 			let result = _.intersection(expectedMethods, methods);
 			expect(result).to.be.eql(expectedMethods);
-		})
+		});
 	});
 
 	afterEach(() => {

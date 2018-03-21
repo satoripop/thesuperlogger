@@ -96,7 +96,7 @@ Console.prototype.log = function (info, callback) {
 	}
 	meta.context = meta.context || 'GENERAL';
 	if (!meta.logblock) {
-		throw "super-logger: a logblock is mandatory";
+		throw 'super-logger: a logblock is mandatory';
 	}
 
 	setImmediate(function () {

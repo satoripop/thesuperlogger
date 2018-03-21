@@ -83,7 +83,7 @@ Mail.prototype.log = function(info, cb) {
 		}
 		meta.context = meta.context || 'GENERAL';
 		if (!meta.logblock) {
-			throw "super-logger: a logblock is mandatory";
+			throw 'super-logger: a logblock is mandatory';
 		}
 
 		let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});

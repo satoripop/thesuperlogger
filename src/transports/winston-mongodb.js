@@ -227,7 +227,7 @@ MongoDB.prototype.log = function(info, cb) {
 
 	meta.context = meta.context || 'GENERAL';
 	if (!meta.logblock) {
-		throw "super-logger: a logblock is mandatory";
+		throw 'super-logger: a logblock is mandatory';
 	}
 	let type = meta.type || logTypes.BASE;
 
