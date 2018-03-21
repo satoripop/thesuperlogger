@@ -28,13 +28,13 @@ const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = requi
 const server = require('./api/server');
 
 
-const ansi = new chalk.constructor({level: 1});
+const ansi = new chalk.constructor({level: 0});
 if (supportsColor.stderr.has16m) {
-	const ansi = new chalk.constructor({level: 4});
-} else if (supportsColor.stdout.has256) {
 	const ansi = new chalk.constructor({level: 3});
-} else if (supportsColor.stdout) {
+} else if (supportsColor.stdout.has256) {
 	const ansi = new chalk.constructor({level: 2});
+} else if (supportsColor.stdout) {
+	const ansi = new chalk.constructor({level: 1});
 }
 
 let instance = null;
