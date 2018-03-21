@@ -9,8 +9,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const Logger = require('../src/logger');
 const logTypes = require('../src/helpers/logTypes');
-const {lowestLevel, levelFromResStatus} = require('../src/helpers/levelsSettings');
+const {levels, lowestLevel, levelFromResStatus} = require('../src/helpers/levelsSettings');
 const request = require('request');
+const _ = require('lodash');
 
 const sinon = require('sinon');
 const chai = require('chai');
@@ -242,16 +243,16 @@ describe('logger', ()=>{
 				}).to.throw();
 			});
 
-			it('should not throw error in circular objects', () => {
-				expect(() => {
-					let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
-					request.get(url, (err, httpResponse, body) => {
-						body = {test: body}; //create circular object
+			it('should not throw error in circular objects', (done) => {
+				let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
+				request.get(url, (err, httpResponse, body) => {
+					body = {test: body}; //create circular object
+					expect(() => {
 						logger.endRequestLogging(url, 'get', err, httpResponse, body);
-					});
-				}).to.not.throw();
+					}).to.not.throw();
+					done();
+				});
 			});
-
 		});
 	});
 
@@ -295,14 +296,37 @@ describe('logger', ()=>{
 	});
 
 	describe('logger level wrappers', () => {
-		beforeEach(() => {
-			logger.init({
-				logDir: './logs',
-				dbSettings,
-				mailSettings,
-				api,
-			});
-		});
+		it('should contain log wrapeprs', () => {
+			function hasMethod (obj, name) {
+			  const desc = Object.getOwnPropertyDescriptor (obj, name);
+			  return typeof desc.value === 'function';
+			}
+			function getInstanceMethodNames (obj) {
+			  let array = [];
+			  let proto = Object.getPrototypeOf (obj);
+				let stop = false;
+			  while (proto && !stop) {
+			    Object.getOwnPropertyNames (proto)
+			      .forEach (name => {
+							if( name == "emergency") stop = true;
+			        if (name !== 'constructor') {
+			          if (hasMethod (proto, name)) {
+			            array.push (name);
+			          }
+			        }
+			      });
+			    proto = Object.getPrototypeOf (proto);
+			  }
+			  return array;
+			}
+			let methods = getInstanceMethodNames(logger);
+			let expectedMethods = [];
+			for (level in levels) {
+				expectedMethods.push(level);
+			}
+			let result = _.intersection(expectedMethods, methods);
+			expect(result).to.be.eql(expectedMethods);
+		})
 	});
 
 	afterEach(() => {
