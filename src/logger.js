@@ -9,7 +9,8 @@
 const { createLogger, format, transports, addColors, add } = require('winston');
 const { combine, prettyPrint, colorize} = format;
 // dependency modules
-const ansi = require('chalk');
+const chalk = require('chalk');
+const supportsColor = require('supports-color');
 const moment = require('moment');
 const shortid = require('shortid');
 const _ = require('lodash');
@@ -26,16 +27,16 @@ const logTypes = require('./helpers/logTypes');
 const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
 
-const supportsColor = require('supports-color');
-if (supportsColor.stdout) {
-	console.log('Terminal stdout supports color');
-}
-if (supportsColor.stdout.has256) {
-	console.log('Terminal stdout supports 256 colors');
-}
+
+const ansi = new chalk.constructor({level: 1});
 if (supportsColor.stderr.has16m) {
-	console.log('Terminal stderr supports 16 million colors (truecolor)');
+	const ansi = new chalk.constructor({level: 4});
+} else if (supportsColor.stdout.has256) {
+	const ansi = new chalk.constructor({level: 3});
+} else if (supportsColor.stdout) {
+	const ansi = new chalk.constructor({level: 2});
 }
+
 let instance = null;
 class Logger {
   constructor() {

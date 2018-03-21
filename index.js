@@ -59,11 +59,11 @@ Promise.all([testFunction(), testFunction()]);
 // app.listen(3005, () => {
 // });
 //
-// let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";
-// logger.callRequestLogging(url, 'get', {}, true);
-// request.get(url, (err, httpResponse, body) => {
-//   logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
-// });
+let url = "http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D";
+logger.callRequestLogging(url, 'get', {}, true);
+request.get(url, (err, httpResponse, body) => {
+  logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+});
 //
 // io = require('socket.io')(3000);
 // logger.wsLogging(io);
