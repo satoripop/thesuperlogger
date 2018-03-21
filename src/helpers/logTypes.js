@@ -7,8 +7,8 @@
 
 //log types definitions
 module.exports = {
-  BASE: 0, //basic logging
-  REST_SERVER: 1, //morgan like logging
-  REST_CLIENT: 2, //requests logging
-  WS: 3, //ws event calls logging
+	BASE: 0, //basic logging
+	REST_SERVER: 1, //morgan like logging
+	REST_CLIENT: 2, //requests logging
+	WS: 3, //ws event calls logging
 };

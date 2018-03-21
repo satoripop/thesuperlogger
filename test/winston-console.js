@@ -17,12 +17,12 @@ const stdMocks = require('std-mocks');
 const {levels} = require('../src/helpers/levelsSettings');
 
 const transports = {
-  defaults: new winstonConsole(),
-  noStderr: new winstonConsole({ stderrLevels: [] }),
-  debugStdout: new winstonConsole({ debugStdout: true }),
-  stderrLevels: new winstonConsole({
-    stderrLevels: ['info', 'warn']
-  })
+	defaults: new winstonConsole(),
+	noStderr: new winstonConsole({ stderrLevels: [] }),
+	debugStdout: new winstonConsole({ debugStdout: true }),
+	stderrLevels: new winstonConsole({
+		stderrLevels: ['info', 'warn'],
+	}),
 };
 
 /**
@@ -34,81 +34,81 @@ const transports = {
  * @return {function} Assertion function to execute comparison
  */
 function assertStderrLevels(transport, stderrLevels) {
-  return () => {
-    assume(JSON.stringify(Object.keys(transport.stderrLevels).sort()))
-      .equals(JSON.stringify(stderrLevels.sort()));
-  };
+	return () => {
+		assume(JSON.stringify(Object.keys(transport.stderrLevels).sort()))
+			.equals(JSON.stringify(stderrLevels.sort()));
+	};
 }
 
 describe('Console transport', () => {
-  describe('with defaults', () => {
-    it("should set stderrLevels to ['error', 'debug'] by default", assertStderrLevels(
-      transports.defaults,
-      ['error', 'debug']
-    ));
+	describe('with defaults', () => {
+		it('should set stderrLevels to [\'error\', \'debug\'] by default', assertStderrLevels(
+			transports.defaults,
+			['error', 'debug']
+		));
 
-    it('logs all levels (EXCEPT error and debug) to stdout', () => {
-      stdMocks.use();
-      transports.defaults.levels = levels;
-      Object.keys(levels)
-        .forEach((level) => {
-          const info = {
-            [LEVEL]: level,
-            message: `This is level ${level}`,
-            level,
-            context: "TEST",
-            logblock:"test-block-" + shortid.generate()
-          };
+		it('logs all levels (EXCEPT error and debug) to stdout', () => {
+			stdMocks.use();
+			transports.defaults.levels = levels;
+			Object.keys(levels)
+				.forEach((level) => {
+					const info = {
+						[LEVEL]: level,
+						message: `This is level ${level}`,
+						level,
+						context: 'TEST',
+						logblock:'test-block-' + shortid.generate(),
+					};
 
-          info[MESSAGE] = JSON.stringify(info);
-          transports.defaults.log(info);
-        });
+					info[MESSAGE] = JSON.stringify(info);
+					transports.defaults.log(info);
+				});
 
-      stdMocks.restore();
-      var output = stdMocks.flush();
-      assume(output.stderr).is.an('array');
-      assume(output.stderr).length(2);
-      assume(output.stdout).is.an('array');
-      assume(output.stdout).length(6);
-    });
-  });
+			stdMocks.restore();
+			var output = stdMocks.flush();
+			assume(output.stderr).is.an('array');
+			assume(output.stderr).length(2);
+			assume(output.stdout).is.an('array');
+			assume(output.stdout).length(6);
+		});
+	});
 
-  describe('throws an appropriate error when', () => {
-    it('if both debugStdout and stderrLevels are set { debugStdout, stderrLevels }', () => {
-      assume(() => {
-        let throwing = new winstonConsole({
-          stderrLevels: ['foo', 'bar'],
-          debugStdout: true
-        })
-      }).throws(/Cannot set debugStdout and stderrLevels/);
-    });
+	describe('throws an appropriate error when', () => {
+		it('if both debugStdout and stderrLevels are set { debugStdout, stderrLevels }', () => {
+			assume(() => {
+				let throwing = new winstonConsole({
+					stderrLevels: ['foo', 'bar'],
+					debugStdout: true,
+				});
+			}).throws(/Cannot set debugStdout and stderrLevels/);
+		});
 
-    it("if stderrLevels is set, but not an Array { stderrLevels: 'Not an Array' }", () => {
-      assume(() => {
-        let throwing = new winstonConsole({
-          stderrLevels: 'Not an Array',
-          debugStdout: false
-        })
-      }).throws(/Cannot set stderrLevels to type other than Array/);
-    });
+		it('if stderrLevels is set, but not an Array { stderrLevels: \'Not an Array\' }', () => {
+			assume(() => {
+				let throwing = new winstonConsole({
+					stderrLevels: 'Not an Array',
+					debugStdout: false,
+				});
+			}).throws(/Cannot set stderrLevels to type other than Array/);
+		});
 
-    it("if stderrLevels contains non-string elements { stderrLevels: ['good', /^invalid$/, 'valid']", () => {
-      assume(() => {
-        let throwing = new winstonConsole({
-          stderrLevels: ['good', /^invalid$/, 'valid'],
-          debugStdout: false
-        })
-      }).throws(/Cannot have non-string elements in stderrLevels Array/);
-    });
-  });
+		it('if stderrLevels contains non-string elements { stderrLevels: [\'good\', /^invalid$/, \'valid\']', () => {
+			assume(() => {
+				let throwing = new winstonConsole({
+					stderrLevels: ['good', /^invalid$/, 'valid'],
+					debugStdout: false,
+				});
+			}).throws(/Cannot have non-string elements in stderrLevels Array/);
+		});
+	});
 
-  it("{ stderrLevels: ['info', 'warn'] } logs to them appropriately", assertStderrLevels(
-    transports.stderrLevels,
-    ['info', 'warn']
-  ));
+	it('{ stderrLevels: [\'info\', \'warn\'] } logs to them appropriately', assertStderrLevels(
+		transports.stderrLevels,
+		['info', 'warn']
+	));
 
-  require('./abstract-transport')({
-    name: '',
-    Transport: winstonConsole
-  });
+	require('./abstract-transport')({
+		name: '',
+		Transport: winstonConsole,
+	});
 });
