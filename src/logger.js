@@ -13,9 +13,7 @@ const chalk = require('chalk');
 const supportsColor = require('supports-color');
 const shortid = require('shortid');
 const _ = require('lodash');
-const circular = require('circular');
 const fs = require('fs');
-const isHtml = require('is-html');
 const EventEmitter = require('events');
 const StackTrace = require('stack-trace');
 // our own modules
@@ -23,8 +21,10 @@ const winstonMongo = require('./transports/winston-mongodb').MongoDB;
 const winstonMail = require('./transports/winston-mail').Mail;
 const winstonConsole = require('./transports/winston-console');
 const logTypes = require('./helpers/logTypes');
-const {levels, lowestLevel, colors, levelFromStatus, levelFromResStatus} = require('./helpers/levelsSettings');
+const {levels, lowestLevel, colors, levelFromStatus} = require('./helpers/levelsSettings');
 const server = require('./api/server');
+const Logblock = require('./logblock');
+const Log = require('./log');
 
 let ansi = new chalk.constructor({level: 0});
 if (supportsColor.stderr.has16m) {
@@ -40,10 +40,6 @@ class Logger {
 	constructor() {
 		if (!instance) {
 			this.logTypes = logTypes;
-			let Logblock = require('./logblock')(this);
-			this.Logblock = Logblock.Instance;
-			this.getLogblock = Logblock.getLogblock;
-			this.setLogblock = Logblock.setLogblock;
 			instance = this;
 		}
 		return instance;
@@ -140,6 +136,14 @@ class Logger {
 			levels,
 			colors,
 		});
+
+		//set log
+		let log = new Log();
+		this.Log = log;
+		//set logblock
+		this.Logblock = Logblock;
+
+
 		if (this.dbTransport && process.env.APP_ENV != 'test') {
 			//launch express logging api
 			server(this, this.options.api);
@@ -268,132 +272,6 @@ class Logger {
 	}
 
 	/**
-   * Log on a call request:
-   * log instantly the called route with its params, query, body and method.
-   * @param  {string}  url        url called
-   * @param  {string}  method     method used
-   * @param  {object}  form       body sent to request
-   * @param  {boolean} [api=true] is the url called part of a private API
-   */
-	callRequestLogging(url, method, form, api = true){
-		if(!url || !method){
-			throw new Error('Url and method are required for your request logging.');
-		}
-		method = method.toUpperCase();
-		let uid = shortid.generate();
-		let urlName = (url.split('?'))[0]
-			.replace(/(^\w+:|^)\/\//, '')
-			.replace(/\//g, '-');
-		let logblock = `${urlName}-${method}-${uid}`;
-		let logMeta = {
-			type: this.logTypes.REST_CLIENT,
-			logblock,
-			context: 'REQUEST',
-		};
-
-		//log request call
-		let apiCallMsg = 'API ';
-		let msg = 'Request %s';
-		if(api){
-			msg = apiCallMsg + msg;
-		}
-		this.logger.info(msg, ansi.blue(`${url}: ${method}`), logMeta);
-
-		//log request query
-		let queryString = (url.split('?'))[1];
-		let query = queryString ? JSON.parse(
-			'{"' + queryString.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
-			(key, value) => key===''?value:decodeURIComponent(value)
-		):{};
-		if(!_.isEmpty(query)){
-			let logMetaQuery = Object.assign({}, logMeta, {query});
-			this.logger.info('Query params: ', logMetaQuery);
-		}
-
-		//log the request body
-		if(!_.isEmpty(form)){
-			let logMetaBody = Object.assign({}, logMeta, {form});
-			this.logger.info('Body request: ', logMetaBody);
-		}
-
-	}
-
-	/**
-   * Log a request call response:
-   * log after request the error, status and body response
-   * @param  {string}  method       method used
-   * @param  {object}  err          error on request
-   * @param  {object}  httpResponse httpResponse
-   * @param  {object}  body         body Response
-   * @param  {boolean} [api=true]   is the url called part of a private API
-   * @param  {boolean} [json=false] is the body response a json
-   */
-	endRequestLogging(url, method, err, httpResponse, body, api = true, json = false){
-		if(!url || !method){
-			throw new Error('Url and method are required for your request logging.');
-		}
-		method = method.toUpperCase();
-		let uid = shortid.generate();
-		let urlName = (url.split('?'))[0]
-			.replace(/(^\w+:|^)\/\//, '')
-			.replace(/\//g, '-');
-
-		let logblock = `${urlName}-${method}-${uid}`;
-		let logMeta = {
-			type: this.logTypes.REST_CLIENT,
-			logblock,
-			context: 'REQUEST',
-		};
-		//log request error
-		if(!_.isEmpty(err)){
-			let logMetaError = Object.assign({}, logMeta, {err});
-			this.logger.error('Request fail on: ', logMetaError);
-		} else {
-			//log request call
-			let level = levelFromResStatus(httpResponse.statusCode);
-			let msg = api ? '%s API Response %s ' : '%s Response %s ';
-			let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
-				ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
-				ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
-			this.logger.log(level, msg, status, ansi.blue(`${url}: ${method}`), logMeta);
-			//log file containing html body
-			if (isHtml(body)) {
-				let data = body.toString();
-				let path = `${this.logDir}/${uid}.html`;
-				fs.writeFile(path, data, 'utf8', (rerr) => {
-					if (rerr) {
-						this.logger.error('Error on write error file', Object.assign({}, logMeta, {err: rerr}));
-					}
-				});
-				this.logger.info('Body Response saved in a HTML file: %s', path, logMeta);
-				//log body
-			} else if (typeof body === 'string') {
-				if (json) {
-					try {
-						body = JSON.parse(body);
-						let logMetaBody = Object.assign({}, logMeta, body);
-						this.logger.info('Body Response', logMetaBody);
-					} catch (e) {
-						let logMetaBodyError = Object.assign({}, logMeta, {body});
-						//log error if body can't be parsed to json object
-						this.logger.error('Parsing body response to object fail: ', logMetaBodyError);
-						this.logger.info('Body Response: %s', body, logMeta);
-					}
-				} else {
-					this.logger.info('Body Response: %s', body.toString(), logMeta);
-				}
-				//log body if string or object
-			} else if (typeof body === 'object') {
-				let logMetaBody = Object.assign({}, logMeta, { body: JSON.stringify(body, circular()) });
-				this.logger.info('Body Response', logMetaBody);
-			} else {
-				body = body.toString();
-				this.logger.info('Body Response: %s', body, logMeta);
-			}
-		}
-	}
-
-	/**
    * [logWS description]
    * @param  {object} io the io socket object
    */
@@ -438,39 +316,7 @@ class Logger {
 		});
 	}
 
-	//add wrapper functions for levels
-	debug (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.debug(...args);
-	}
-	info (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.info(...args);
-	}
-	notice (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.notice(...args);
-	}
-	warning (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.warning(...args);
-	}
-	error (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.error(...args);
-	}
-	critical (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.critical(...args);
-	}
-	alert (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.alert(...args);
-	}
-	emergency (...args) {
-		args = this.setLogblock(args, this.getLogblock());
-		return this.logger.emergency(...args);
-	}
+
 }
 
 module.exports = Logger;
