@@ -43,7 +43,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 			order: parseInt(order) >= 0 ? 'asc' : 'desc',
 			fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level'],
 		};
-		logger.listLog(options)
+		logger._listLog(options)
 			.then(results => {
 				res.json(results);
 			})
@@ -73,7 +73,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 			fields: ['content', 'timestamp', 'context', 'type', 'level'],
 			group: 'logblock',
 		};
-		logger.listLog(options)
+		logger._listLog(options)
 			.then(results => {
 				res.json(results);
 			})

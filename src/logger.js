@@ -142,13 +142,13 @@ class Logger {
 
 		//log uncaughtExceptions
 		if(process.env.APP_ENV != 'test')
-			process.once('uncaughtException', err => this.logExceptions(this, err));
+			process.once('uncaughtException', err => this._logExceptions(this, err));
 	}
 
 	/**
    * log uncaught exceptions
    */
-	logExceptions(self, err) {
+	_logExceptions(self, err) {
 		console.log(err);
 		let noMongoLog = false;
 		if (err instanceof Error && err.name == 'MongoError') {
@@ -263,7 +263,7 @@ class Logger {
 	}
 
 	/**
-   * [logWS description]
+   * log websocket event
    * @param  {object} io the io socket object
    */
 	wsLogging(io){
@@ -295,7 +295,7 @@ class Logger {
    * Mongo query to get saved logs
    * @param  {Object} [options={}] query options
    */
-	listLog(options = {}){
+	_listLog(options = {}){
 		return new Promise ((resolve, reject) => {
 			this.dbTransport.query(options, (err, results) => {
 				if(err){

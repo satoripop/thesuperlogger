@@ -62,7 +62,7 @@ class Log {
 	 * @param  {boolean} [api=true] is the url called part of a private API
 	 * @param  {string}  logblock		logblock value
 	 */
-	callRequestLogging(url, method, form, api = true, logblock){
+	_callRequestLogging(url, method, form, api = true, logblock){
 		if(!url || !method){
 			throw new Error('Url and method are required for your request logging.');
 		}
@@ -104,6 +104,15 @@ class Log {
 		}
 
 	}
+
+	/**
+	 * wrapper for callRequestLogging
+	 * @param  {array} args
+	 */
+	callRequestLogging(...args) {
+		this._callRequestLogging(...args);
+	}
+
 	/**
 	 * Log a request call response:
 	 * log after request the error, status and body response
@@ -115,7 +124,7 @@ class Log {
 	 * @param  {boolean} [json=false] is the body response a json
 	 * @param  {string}  logblock		logblock value
 	 */
-	endRequestLogging(url, method, err, httpResponse, body, api = true, json = false, logblock){
+	_endRequestLogging(url, method, err, httpResponse, body, api = true, json = false, logblock){
 		if(!url || !method){
 			throw new Error('Url and method are required for your request logging.');
 		}
@@ -178,6 +187,14 @@ class Log {
 				this.logger.info('Body Response: %s', body, logMeta);
 			}
 		}
+	}
+
+	/**
+	 * wrapper for endRequestLogging
+	 * @param  {array} args
+	 */
+	endRequestLogging(...args) {
+		this._endRequestLogging(...args);
 	}
 }
 

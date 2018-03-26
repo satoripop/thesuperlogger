@@ -48,7 +48,7 @@ class Logblock extends Log {
 	 * @param {array} args log args
 	 * @return {array} return args with new meta
 	 */
-	setLogMeta(args){
+	_setLogMeta(args){
 		let context = this.context;
 		let source = this.source;
 		let meta = args[args.length - 1];
@@ -66,35 +66,35 @@ class Logblock extends Log {
 
 	//add wrapper functions for levels
 	debug (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.debug(...args);
 	}
 	info (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.info(...args);
 	}
 	notice (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.notice(...args);
 	}
 	warning (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.warning(...args);
 	}
 	error (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.error(...args);
 	}
 	critical (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.critical(...args);
 	}
 	alert (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.alert(...args);
 	}
 	emergency (...args) {
-		args = this.setLogMeta(args);
+		args = this._setLogMeta(args);
 		return super.emergency(...args);
 	}
 
@@ -109,7 +109,7 @@ class Logblock extends Log {
 	 * @param  {string}  logblock		logblock value
 	 */
 	endRequestLogging(url, method, err, httpResponse, body, api = true, json = false) {
-		super.endRequestLogging(url, method, err, httpResponse, body, api, json, this.name);
+		super._endRequestLogging(url, method, err, httpResponse, body, api, json, this.name);
 	}
 
 	/**
@@ -121,7 +121,7 @@ class Logblock extends Log {
 	 * @param  {string}  logblock		logblock value
 	 */
 	callRequestLogging(url, method, form, api = true) {
-		super.callRequestLogging(url, method, form, api, this.name);
+		super._callRequestLogging(url, method, form, api, this.name);
 	}
 }
 
