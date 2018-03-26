@@ -6,6 +6,8 @@
  */
 const Logger = require('../src/logger');
 const {levels} = require('../src/helpers/levelsSettings');
+const Logblock = require('../src/logblock');
+const StackTrace = require('stack-trace');
 
 const assert = require('assert');
 const sinon = require('sinon');
@@ -14,78 +16,94 @@ const expect = chai.expect;
 
 
 describe('logblock', () => {
-	let logger;
-	let Logblock;
-	before(() => {
+	let logger = new Logger();
+	let options = {
+		logDir: './logs',
+	};
+	logger.init(options);
+	let logging = new logger.Logblock('test-logblock');
+
+	beforeEach(() => {
 		logger = new Logger();
-		logger.init({
-			logDir: './logs',
-		});
-		Logblock = require('../src/logblock')(logger);
+		logger.init(options);
 	});
 
-	describe('.getLogblock()', () => {
-		it('should be present', () => {
-			assert.ok(Logblock.getLogblock);
-			assert.equal('function', typeof Logblock.getLogblock);
+	describe('constructor', () => {
+		it('should accept no params', () => {
+			let logblock, strace;
+			expect(() => {
+				strace = StackTrace.get()[1];
+				logblock = new logger.Logblock();
+			}).to.not.throw();
+			let logblockName = strace.getMethodName() || strace.getFunctionName() || strace.getFileName();
+			expect(logblock.name.includes(logblockName)).to.be.true;
 		});
 
-		it('should return logblock name', () => {
-			let name = Logblock.getLogblock();
-			expect((name.split('-'))[0]).to.be.equal('callFn');
-			expect(name).to.be.string;
+		it('should accept string params', () => {
+			let logblock;
+			let logblockName = 'test-logblock';
+			expect(() => {
+				logblock = new logger.Logblock(logblockName);
+			}).to.not.throw();
+			expect(logblock.name.includes(logblockName)).to.be.true;
+		});
+
+		it('should accept object params', () => {
+			let logblock;
+			let logblockName = 'test-logblock';
+			expect(() => {
+				logblock = new logger.Logblock({
+					name: logblockName,
+					context: 'TEST',
+					source: 'TEST',
+				});
+			}).to.not.throw();
+			expect(logblock.name.includes(logblockName)).to.be.true;
+			expect('TEST').to.be.equal(logblock.context);
+			expect('TEST').to.be.equal(logblock.source);
+		});
+	});
+	describe('._setLogMeta()', () => {
+		it('should return array of args with constructor value (without meta)', () => {
+			let name = 'test-logblock',
+				context = 'TEST',
+				source = 'TEST';
+			let logblock = new logger.Logblock({
+				name,
+				context,
+				source,
+			});
+			let result = logblock._setLogMeta(['text']);
+			expect(result).to.be.an('array');
+			expect(result[1].context).to.be.equal(context);
+			expect(result[1].source).to.be.equal(source);
+			expect(result[1].logblock.includes(name)).to.be.true;
+		});
+
+		it('should return array of args with constructor value (with meta)', () => {
+			let name = 'test-logblock',
+				context = 'TEST',
+				source = 'TEST';
+			let logblock = new logger.Logblock({
+				name,
+				context,
+				source,
+			});
+			let result = logblock._setLogMeta(['text', {context: 'TEST2'}]);
+			expect(result).to.be.an('array');
+			expect(result[1].context).to.not.be.equal(context);
+			expect(result[1].source).to.be.equal(source);
+			expect(result[1].logblock.includes(name)).to.be.true;
 		});
 	});
 
-	describe('.setLogblock()', () => {
-		it('should be present', () => {
-			assert.ok(Logblock.setLogblock);
-			assert.equal('function', typeof Logblock.setLogblock);
-		});
-
-		it('should set logblock', () => {
-			let args = Logblock.setLogblock([], 'test');
-			expect(args[args.length - 1].logblock).to.be.equal('test');
-			expect(args[args.length - 1].logblock).to.be.string;
-		});
+	require('./abstract-log')({
+		name: 'logblock',
+		type: logging,
+		logger,
 	});
 
-	describe('Instance', () => {
-		it('should be present', () => {
-			assert.ok(Logblock.Instance);
-			assert.equal('function', typeof Logblock.Instance);
-		});
-
-		it('should contain log wrapeprs', () => {
-			let logblock = new Logblock.Instance();
-			function hasMethod (obj, name) {
-				const desc = Object.getOwnPropertyDescriptor (obj, name);
-				return typeof desc.value === 'function';
-			}
-			function getInstanceMethodNames (obj) {
-				let array = [];
-				let proto = Object.getPrototypeOf (obj);
-				let stop = false;
-				while (proto && !stop) {
-					Object.getOwnPropertyNames (proto).forEach (name => {
-						if( name == 'emergency') stop = true;
-						if (name !== 'constructor') {
-							if (hasMethod (proto, name)) {
-								array.push (name);
-							}
-						}
-					});
-					proto = Object.getPrototypeOf (proto);
-				}
-				return array;
-			}
-			let methods = getInstanceMethodNames(logblock);
-			let expectedMethods = ['setLogblock'];
-			for (let level in levels) {
-				expectedMethods.push(level);
-			}
-			expect(methods).to.be.eql(expectedMethods);
-		});
+	afterEach(() => {
+		logger.clear(logger);
 	});
-
 });

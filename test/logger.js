@@ -21,7 +21,7 @@ const expect = chai.expect;
 
 require('dotenv-extended').load();
 process.setMaxListeners(0);
-describe('logger', ()=>{
+describe('logger', () => {
 	let app, api, logger;
 	let mailSettings = {
 		transportOptions: {
@@ -128,7 +128,6 @@ describe('logger', ()=>{
 				} else {
 					expect(logger.level).to.equal(lowestLevel);
 				}
-				//logger.clear(logger);
 			});
 		});
 
@@ -138,7 +137,6 @@ describe('logger', ()=>{
 				expect(() => {
 					logger.init(options);
 				}).to.throw();
-				//logger.clear(logger);
 			});
 		});
 	});
@@ -171,7 +169,7 @@ describe('logger', ()=>{
 			logger.dbTransport.on('logged', eventSpy);
 			var e = new Error('test');
 			e.name = 'MongoError';
-			logger.logExceptions(logger, e);
+			logger._logExceptions(logger, e);
 		});
 
 		it('should exit immediatly if no mail transport exist on MongoError', (done) => {
@@ -190,7 +188,7 @@ describe('logger', ()=>{
 			});
 			var e = new Error('test');
 			e.name = 'MongoError';
-			logger.logExceptions(logger, e);
+			logger._logExceptions(logger, e);
 		});
 
 		it('should exit after logging if mail and db transport exist', (done) => {
@@ -211,50 +209,13 @@ describe('logger', ()=>{
 			logger.dbTransport.on('logged', info => {
 				logEmitted++;
 			});
-			logger.logExceptions(logger, 'error');
+			logger._logExceptions(logger, 'error');
 		});
 	});
 
 	// describe('logger expressLogging middleware', () => {
 	//   it()
 	// });
-
-	describe('logger request logging', () => {
-		beforeEach(() => {
-			logger.init({
-				logDir: './logs',
-				api,
-			});
-		});
-
-		describe('logger callRequestLogging', () => {
-			it('should throw error in method or url missing', () => {
-				expect(() => {
-					logger.callRequestLogging();
-				}).to.throw();
-			});
-		});
-
-		describe('logger endRequestLogging', () => {
-
-			it('should throw error in method or url missing', () => {
-				expect(() => {
-					logger.endRequestLogging();
-				}).to.throw();
-			});
-
-			it('should not throw error in circular objects', (done) => {
-				let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
-				request.get(url, (err, httpResponse, body) => {
-					body = {test: body}; //create circular object
-					expect(() => {
-						logger.endRequestLogging(url, 'get', err, httpResponse, body);
-					}).to.not.throw();
-					done();
-				});
-			});
-		});
-	});
 
 	describe('logger websocket logging', () => {
 		it('should throw an error if not io socket object is passed', () => {
@@ -277,7 +238,7 @@ describe('logger', ()=>{
 				logDir: './logs',
 				api,
 			});
-			expect(logger.listLog()).to.be.rejected;
+			expect(logger._listLog()).to.be.rejected;
 		});
 
 		it('should resolve an array', (done) => {
@@ -287,44 +248,11 @@ describe('logger', ()=>{
 				dbSettings,
 				api,
 			});
-			logger.listLog()
+			logger._listLog()
 				.then((res) => {
 					expect(res).to.be.an('array');
 					done();
 				});
-		});
-	});
-
-	describe('logger level wrappers', () => {
-		it('should contain log wrapeprs', () => {
-			function hasMethod (obj, name) {
-				const desc = Object.getOwnPropertyDescriptor (obj, name);
-				return typeof desc.value === 'function';
-			}
-			function getInstanceMethodNames (obj) {
-				let array = [];
-				let proto = Object.getPrototypeOf (obj);
-				let stop = false;
-				while (proto && !stop) {
-					Object.getOwnPropertyNames (proto).forEach (name => {
-						if( name == 'emergency') stop = true;
-						if (name !== 'constructor') {
-							if (hasMethod (proto, name)) {
-								array.push (name);
-							}
-						}
-					});
-					proto = Object.getPrototypeOf (proto);
-				}
-				return array;
-			}
-			let methods = getInstanceMethodNames(logger);
-			let expectedMethods = [];
-			for (let level in levels) {
-				expectedMethods.push(level);
-			}
-			let result = _.intersection(expectedMethods, methods);
-			expect(result).to.be.eql(expectedMethods);
 		});
 	});
 

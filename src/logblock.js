@@ -8,6 +8,7 @@
 // dependency modules
 const shortid = require('shortid');
 const StackTrace = require('stack-trace');
+const _ = require('lodash');
 // our own modules
 const Log = require('./log');
 
@@ -23,14 +24,15 @@ class Logblock extends Log {
 	constructor(data) {
 		super();
 		let name, context, source;
-		if (typeof data == 'string') {
-			name = data;
-		} else {
-			let name = data.name,
-				context = data.context,
+		if (!_.isEmpty(data)) {
+			if (typeof data == 'string') {
+				name = data;
+			} else {
+				name = data.name;
+				context = data.context;
 				source = data.source;
+			}
 		}
-
 		let logblockId = shortid.generate();
 		if (name) {
 			this.name = `${name}-${logblockId}`;
@@ -54,13 +56,15 @@ class Logblock extends Log {
 		let meta = args[args.length - 1];
 		if (typeof meta == 'object') {
 			args[args.length - 1].logblock = meta.logblock || this.name;
-			context = meta.context;
-			source = meta.source;
+			args[args.length - 1].context = meta.context || context;
+			args[args.length - 1].source = meta.source || source;
 		} else {
-			args[args.length] = {logblock: this.name};
+			args[args.length] = {
+				logblock: this.name,
+				context,
+				source,
+			};
 		}
-		args.context = context;
-		args.source = source;
 		return args;
 	}
 
