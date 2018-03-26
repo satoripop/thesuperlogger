@@ -62,11 +62,11 @@ Promise.all([testFunction(), testFunction()]);
 // });
 //
 let url = 'http://validate.jsontest.com/?json=%5BJSON-code-to-validate%5D';
-logger.info("I'm one of a kind", {logblock: "yo"});
-logger.info("I'm lifeless",);
-logger.callRequestLogging(url, 'get', {}, true);
+logger.Log.info('I\'m one of a kind', {logblock:'yo'});
+logger.Log.info('I\'m lifeless');
+logger.Log.callRequestLogging(url, 'get', {}, true);
 request.get(url, (err, httpResponse, body) => {
-	logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+	logblock.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
 	logblock.info('all part of the same shit!');
 });
 //
