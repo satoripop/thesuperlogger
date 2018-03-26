@@ -6,25 +6,15 @@
  */
 
 // dependency modules
-const chalk = require('chalk');
-const supportsColor = require('supports-color');
 const shortid = require('shortid');
 const _ = require('lodash');
 const isHtml = require('is-html');
 const fs = require('fs');
 const circular = require('circular');
 // our own modules
+const ansi = require('./helpers/ansi.js');
 const logTypes = require('./helpers/logTypes');
 const {levelFromResStatus} = require('./helpers/levelsSettings');
-
-let ansi = new chalk.constructor({level: 0});
-if (supportsColor.stderr.has16m) {
-	ansi = new chalk.constructor({level: 3});
-} else if (supportsColor.stdout.has256) {
-	ansi = new chalk.constructor({level: 2});
-} else if (supportsColor.stdout) {
-	ansi = new chalk.constructor({level: 1});
-}
 
 /**
  * Log class
