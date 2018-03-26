@@ -95,9 +95,6 @@ Console.prototype.log = function (info, callback) {
 		delete meta.level;
 	}
 	meta.context = meta.context || 'GENERAL';
-	if (!meta.logblock) {
-		throw 'super-logger: a logblock is mandatory';
-	}
 
 	setImmediate(function () {
 		self.emit('logged', info);
