@@ -22,8 +22,8 @@ You can check the blueprint docs [here](https://docs.google.com/document/d/14yhG
   * [Logblock log](#logblock-log)
   * [Express logging](#express-logging)
   * [Request logging](#request-logging)
-	  * [callRequestLogging](#callrequestlogging)
-    * [endRequestLogging](#endrequestlogging)
+	* [callRequestLogging](#callrequestlogging)
+	* [endRequestLogging](#endrequestlogging)
   * [Websocket logging](#websocket-logging)
   * [Mail Logging](#mail-logging)
   * [Logging API](#logging-api)
@@ -293,6 +293,7 @@ Set your mail settings in the init method as follow:
 - subject: Your mail subject
 - html: set to true if you use html in your formatter, false by default.
 - formatter: a method to format your email
+
 ```
   const formatter = (data) => {
     let msg = util.format(data.message, ...data.splat);
