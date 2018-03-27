@@ -51,7 +51,7 @@ describe('api routes', () => {
 			order: 'asc',
 			fields,
 		};
-		logger.listLog(options)
+		logger._listLog(options)
 			.then(results => {
 				request
 					.get('/test')
@@ -86,7 +86,7 @@ describe('api routes', () => {
 			fields,
 			group: 'logblock',
 		};
-		logger.listLog(options)
+		logger._listLog(options)
 			.then(results => {
 				request
 					.get('/test/by-block')

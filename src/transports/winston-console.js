@@ -8,23 +8,13 @@
 
 const os = require('os');
 const util = require('util');
-const chalk = require('chalk');
-const supportsColor = require('supports-color');
 const moment = require('moment');
 const { LEVEL } = require('triple-beam');
 const TransportStream = require('winston-transport');
 const helpers = require('./helpers');
 const {colors} = require('../helpers/levelsSettings');
 const _ = require('lodash');
-
-let ansi = new chalk.constructor({level: 0});
-if (supportsColor.stderr.has16m) {
-	ansi = new chalk.constructor({level: 3});
-} else if (supportsColor.stdout.has256) {
-	ansi = new chalk.constructor({level: 2});
-} else if (supportsColor.stdout) {
-	ansi = new chalk.constructor({level: 1});
-}
+const ansi = require('../helpers/ansi.js');
 
 //
 // ### function Console (options)
@@ -95,9 +85,6 @@ Console.prototype.log = function (info, callback) {
 		delete meta.level;
 	}
 	meta.context = meta.context || 'GENERAL';
-	if (!meta.logblock) {
-		throw 'super-logger: a logblock is mandatory';
-	}
 
 	setImmediate(function () {
 		self.emit('logged', info);

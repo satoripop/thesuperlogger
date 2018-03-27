@@ -97,20 +97,65 @@ We use these context. But you can add your own as you please:
 
 ### Base log:
 Depending on the level you want to use you just need to call the level method name.
-Each log is part of a logblock. A auto generated logblock format is *[methodName|functionName|fileName]-[logblockId]*.
-You can pass your own logblock or logblockId.
-The source field is not required.
+The source and context fields are not required.
 ```
-textError = "hello %s !";
+textError = "hello %s!";
 value = "world";
 objectError = {x: 2};
 Object.assign(objectError, {
   context: "MY_CONTEXT",
-  logblock: "test_block-123",
   source: "CLIENT_SIDE"
 })
-logger.error(textError, value, objectError);
-//error: hello world ! {x: 2}
+logger.Log.error(textError, value, objectError);
+//error: hello world! {x: 2} {context: "MY_CONTEXT", source: "CLIENT_SIDE"}
+
+logger.Log.info("Yo %s!", "superman");
+//info: Yo superman!
+
+logger.Log.emergency(textError, value, {z: 3});
+//emergency: hello world! {x: 2} {context: "GENERAL"}
+```
+
+### Logblock log
+You can collect multiple logs in one logblock. It can be very useful if you want to follow a process.
+All logs of the same logblock will have a logblock name and may have the same context and source if specified on the constructor.
+If no logblock name is specified on the constructor, an auto generated logblock name format will be *[methodName|functionName|fileName]-[logblockId]*.
+```
+function myFunction () {
+	let logblock = new logger.Logblock();
+	logblock.info("hey");
+	logblock.info("it's", {context: "MY_CONTEXT"});
+	logblock.error("superman!", {source: "MY_SOURCE"});
+}
+myFunction();
+
+//info: hey {context: "GENERAL", logblock: "myFunction-123456"}
+//info: it's {context: "MY_CONTEXT", logblock: "myFunction-123456"}
+//error: it's {context: "GENERAL", source: "MY_SOURCE", logblock: "myFunction-123456"}
+
+function myFunction () {
+	let logblock = new logger.Logblock("test");
+	logblock.info("hey");
+}
+myFunction();
+
+//info: hey {context: "GENERAL", logblock: "test-123456"}
+
+function myFunction () {
+	let logblock = new logger.Logblock({
+		name: "test",
+		context: "MY_LOGBLOCK_CTX",
+		source: "MY_SOURCE_CTX",
+	});
+	logblock.info("hey");
+	logblock.info("it's", {context: "MY_CONTEXT"});
+	logblock.error("superman!", {source: "MY_SOURCE"});
+}
+myFunction();
+
+//info: hey {context: "MY_LOGBLOCK_CTX", source: "MY_SOURCE_CTX", logblock: "test-123456"}
+//info: it's {context: "MY_CONTEXT", source: "MY_SOURCE_CTX", logblock: "test-123456"}
+//error: it's {context: "MY_LOGBLOCK_CTX", source: "MY_SOURCE", logblock: "test-123456"}
 ```
 
 ### Express logging
@@ -180,9 +225,19 @@ endRequestLogging(url, method, err, httpResponse, body, api, json )
 ```
 const request = require('request');
 let url = "http://ip.jsontest.com/ ";
-logger.callRequestLogging(url, 'GET', {}, true);
+logger.Log.callRequestLogging(url, 'GET', {}, true);
 request.get(url, (err, httpResponse, body) => {
-  logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+  logger.Log.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+});
+```
+In a logblock:
+```
+const request = require('request');
+let url = "http://ip.jsontest.com/ ";
+let logblock = new logger.Logblock();
+logblock.callRequestLogging(url, 'GET', {}, true);
+request.get(url, (err, httpResponse, body) => {
+  logblock.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
 });
 ```
 ### Websocket logging
