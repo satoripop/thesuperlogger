@@ -253,7 +253,7 @@ class Logger {
           ansi.grey(`${res.responseTime}ms`);
 				self.logger.log(level(req, res), msg, logMeta);
 				//log response body
-				if(!_.isEmpty(res.body)){
+				if (!_.isEmpty(res.body)) {
 					let logMetaResponseBody = Object.assign({}, logMeta, res.body);
 					self.logger.info('Response Body: ', logMetaResponseBody);
 				}
@@ -298,9 +298,9 @@ class Logger {
 	_listLog(options = {}){
 		return new Promise ((resolve, reject) => {
 			this.dbTransport.query(options, (err, results) => {
-				if(err){
+				if(err) {
 					reject(err);
-				}else{
+				} else {
 					resolve(results);
 				}
 			});
