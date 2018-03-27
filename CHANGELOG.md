@@ -4,6 +4,24 @@ All notable changes to super-logger will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2018-03-27
+### Added
+- filter with regex content and logblock sub parts in API
+- filter with timestamp in API
+- filter with order in API
+- handle support color
+- eslint rules
+- logblock class with stack trace function detection
+- log class that contains logging wrappers
+- psoeudo privacy to methods
+
+### Fixed
+- readme table of contents
+- eslint errors
+
+### Removed
+- jshint
+
 ## [1.0.0-rc4] - 2018-02-27
 ### Added
 - unit tests
