@@ -1,4 +1,5 @@
 
+
 # Super Logger
 
 An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage).
@@ -8,7 +9,27 @@ You can check the blueprint docs [here](https://docs.google.com/document/d/14yhG
 ----------
 ### Table of contents
 
-[TOC]
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [How to Install](#how-to-install)
+  * [Set env](#set-env)
+* [Docs](#docs)
+  * [Init Logger](#init-logger)
+  * [Levels and console colors](#levels-and-console-colors)
+  * [Log types](#log-types)
+  * [Pre-existing context](#pre-existing-context)
+  * [Base log](#base-log)
+  * [Logblock log](#logblock-log)
+  * [Express logging](#express-logging)
+  * [Request logging](#request-logging)
+	  * [callRequestLogging](#callrequestlogging)
+    * [endRequestLogging](#endrequestlogging)
+  * [Websocket logging](#websocket-logging)
+  * [Mail Logging](#mail-logging)
+  * [Logging API](#logging-api)
+* [Todos](#todos)
+
+
 
 ----------
 
@@ -29,7 +50,7 @@ you have to add *LOG_LEVEL* & *DB_LOG_LEVEL* & optionaly *MAIL_LOG_LEVEL* to you
 LOG_LEVEL is relevant to the lowest log level you'll see in your console.
 DB_LOG_LEVEL is relevant to the lowest log level you'll save in your database.
 MAIL_LOG_LEVEL is relevant to the lowest log level you'll receive log emails.
-These are the levels you can state [here](### Levels and console colors).
+These are the levels you can state [here](#levels-and-console-colors).
 
 Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels.
 
@@ -77,10 +98,10 @@ The levels of Super Logger are:
 
 ### Log types:
 We have a specific kind of logging for each of these types:
-- [BASE](### Base log): 0 -> basic logging
-- [REST_SERVER](### Express logging): 1 -> morgan like logging but cooler
-- [REST_CLIENT](### Request logging): 2 -> requests logging
-- [WS](### Websocket logging): 3 -> ws event calls logging
+- [BASE](#base-log): 0 -> basic logging
+- [REST_SERVER](#express-logging): 1 -> morgan like logging but cooler
+- [REST_CLIENT](#request-logging): 2 -> requests logging
+- [WS](#websocket-logging): 3 -> ws event calls logging
 
 You can access log types as following:
 ```
@@ -172,7 +193,7 @@ app.use(logger.expressLogging());
 On each call on your express api you'll have a block of log with the following settings:
 - logblock: [{url}-{method}-{uid}]
 - context: *EXPRESS*
-- type: 1 (REST_SERVER = 1, click [here](### Log types))
+- type: 1 (REST_SERVER = 1, click [here](#log-types))
 
 The log block will contain the following logs:
 - A log to inform you when the route was called (level info)
@@ -189,8 +210,8 @@ For each status code we have a different level:
 
 ### Request logging:
 Whenever you make a request to an API or route you can log its:
-- url, methode, query, body sent with the [*callRequestLogging*](#### callRequestLogging) method.
-- status, body, error received with the [*endRequestLogging*](#### endRequestLogging) method.
+- url, methode, query, body sent with the [*callRequestLogging*](#callrequestlogging) method.
+- status, body, error received with the [*endRequestLogging*](#endrequestlogging) method.
 
 If the body response is an object, array or string it will be saved in your log content.
 
@@ -199,7 +220,7 @@ If the body response is in a html format, it will be saved in a html file under 
 You'll have a block of log with the following settings:
 - logblock: [{url}-{method}-{uid}]
 - context: *REQUEST*
-- type: 2 (REST_CLIENT = 2, click [here](### Log types))
+- type: 2 (REST_CLIENT = 2, click [here](#log-types))
 
 #### callRequestLogging
 ```
@@ -256,7 +277,7 @@ io.on('connection', (socket) => {
 You'll have a block of log with the following settings:
 - logblock: [{eventName}-{uid}]
 - context: *WEBSOCKET*
-- type: 3 (WS = 3, click [here](### Log types))
+- type: 3 (WS = 3, click [here](#log-types))
 
 ### Mail Logging
 You can receive mails from a certain level that you specify in your env var *MAIL_LOG_LEVEL*.
@@ -346,4 +367,4 @@ npm run standalone [PORT] [MONGO_DB_STRING] [LOG_PREFIX] [COLLECTION_NAME]
 
 
 # Todos:
-  - activate/desactivate Logging
+  - Create a logging interface
