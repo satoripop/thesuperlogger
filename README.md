@@ -1,14 +1,35 @@
 
+
 # Super Logger
 
-An NPM logging module that has an API to list and search logs for Node JS quicktext applications (aka RT & CB) plus a real time logging on the console. The API endpoints can be used for the monitoring system (developed on a later stage).
+An NPM logging module that has an API to list and search logs for Node JS applications  plus a real time logging by email and on the console. The API endpoints can be used for the monitoring system (will be developed on a later stage).
 
 You can check the blueprint docs [here](https://docs.google.com/document/d/14yhGJDdrpyrpfUhlv2IQhqKwPftO5VA_YBvWIHJoFkY/edit?usp=sharing).
 
 ----------
 ### Table of contents
 
-[TOC]
+* [Getting Started](#getting-started)
+  * [Prerequisites](#prerequisites)
+  * [How to Install](#how-to-install)
+  * [Set env](#set-env)
+* [Docs](#docs)
+  * [Init Logger](#init-logger)
+  * [Levels and console colors](#levels-and-console-colors)
+  * [Log types](#log-types)
+  * [Pre-existing context](#pre-existing-context)
+  * [Base log](#base-log)
+  * [Logblock log](#logblock-log)
+  * [Express logging](#express-logging)
+  * [Request logging](#request-logging)
+	  * [callRequestLogging](#callrequestlogging)
+	  * [endRequestLogging](#endrequestlogging)
+  * [Websocket logging](#websocket-logging)
+  * [Mail Logging](#mail-logging)
+  * [Logging API](#logging-api)
+* [Todos](#todos)
+
+
 
 ----------
 
@@ -29,7 +50,7 @@ you have to add *LOG_LEVEL* & *DB_LOG_LEVEL* & optionaly *MAIL_LOG_LEVEL* to you
 LOG_LEVEL is relevant to the lowest log level you'll see in your console.
 DB_LOG_LEVEL is relevant to the lowest log level you'll save in your database.
 MAIL_LOG_LEVEL is relevant to the lowest log level you'll receive log emails.
-These are the levels you can state [here](### Levels and console colors).
+These are the levels you can state [here](#levels-and-console-colors).
 
 Exemple: If you set your DB_LOG_LEVEL to *notice* you'll not save logs with *debug* & *info* levels.
 
@@ -77,10 +98,10 @@ The levels of Super Logger are:
 
 ### Log types:
 We have a specific kind of logging for each of these types:
-- [BASE](### Base log): 0 -> basic logging
-- [REST_SERVER](### Express logging): 1 -> morgan like logging but cooler
-- [REST_CLIENT](### Request logging): 2 -> requests logging
-- [WS](### Websocket logging): 3 -> ws event calls logging
+- [BASE](#base-log): 0 -> basic logging
+- [REST_SERVER](#express-logging): 1 -> morgan like logging but cooler
+- [REST_CLIENT](#request-logging): 2 -> requests logging
+- [WS](#websocket-logging): 3 -> ws event calls logging
 
 You can access log types as following:
 ```
@@ -89,6 +110,7 @@ console.log(logger.logTypes);
 
 ### Pre-existing context:
 We use these context. But you can add your own as you please:
+- GENERAL: default value
 - REQUEST: for logs on api or url requests
 - EXPRESS: for logs on express route calls
 - WEBSOCKET: for logs on websocket (socket.io) event calls
@@ -96,19 +118,65 @@ We use these context. But you can add your own as you please:
 
 ### Base log:
 Depending on the level you want to use you just need to call the level method name.
-Each log has a context and is part of a logblock. Thus these fields are mandatory.
-The source field is not required.
+The source and context fields are not required.
 ```
-textError = "hello %s !";
+textError = "hello %s!";
 value = "world";
 objectError = {x: 2};
 Object.assign(objectError, {
   context: "MY_CONTEXT",
-  logblock: "test_block",
   source: "CLIENT_SIDE"
 })
-logger.error(textError, value, objectError);
-//error: hello world ! {x: 2}
+logger.Log.error(textError, value, objectError);
+//error: hello world! {x: 2} {context: "MY_CONTEXT", source: "CLIENT_SIDE"}
+
+logger.Log.info("Yo %s!", "superman");
+//info: Yo superman!
+
+logger.Log.emergency(textError, value, {z: 3});
+//emergency: hello world! {x: 2} {context: "GENERAL"}
+```
+
+### Logblock log
+You can collect multiple logs in one logblock. It can be very useful if you want to follow a process.
+All logs of the same logblock will have a logblock name and may have the same context and source if specified on the constructor.
+If no logblock name is specified on the constructor, an auto generated logblock name format will be *[methodName|functionName|fileName]-[logblockId]*.
+```
+function myFunction () {
+	let logblock = new logger.Logblock();
+	logblock.info("hey");
+	logblock.info("it's", {context: "MY_CONTEXT"});
+	logblock.error("superman!", {source: "MY_SOURCE"});
+}
+myFunction();
+
+//info: hey {context: "GENERAL", logblock: "myFunction-123456"}
+//info: it's {context: "MY_CONTEXT", logblock: "myFunction-123456"}
+//error: it's {context: "GENERAL", source: "MY_SOURCE", logblock: "myFunction-123456"}
+
+function myFunction () {
+	let logblock = new logger.Logblock("test");
+	logblock.info("hey");
+}
+myFunction();
+
+//info: hey {context: "GENERAL", logblock: "test-123456"}
+
+function myFunction () {
+	let logblock = new logger.Logblock({
+		name: "test",
+		context: "MY_LOGBLOCK_CTX",
+		source: "MY_SOURCE_CTX",
+	});
+	logblock.info("hey");
+	logblock.info("it's", {context: "MY_CONTEXT"});
+	logblock.error("superman!", {source: "MY_SOURCE"});
+}
+myFunction();
+
+//info: hey {context: "MY_LOGBLOCK_CTX", source: "MY_SOURCE_CTX", logblock: "test-123456"}
+//info: it's {context: "MY_CONTEXT", source: "MY_SOURCE_CTX", logblock: "test-123456"}
+//error: it's {context: "MY_LOGBLOCK_CTX", source: "MY_SOURCE", logblock: "test-123456"}
 ```
 
 ### Express logging
@@ -125,7 +193,7 @@ app.use(logger.expressLogging());
 On each call on your express api you'll have a block of log with the following settings:
 - logblock: [{url}-{method}-{uid}]
 - context: *EXPRESS*
-- type: 1 (REST_SERVER = 1, click [here](### Log types))
+- type: 1 (REST_SERVER = 1, click [here](#log-types))
 
 The log block will contain the following logs:
 - A log to inform you when the route was called (level info)
@@ -142,8 +210,8 @@ For each status code we have a different level:
 
 ### Request logging:
 Whenever you make a request to an API or route you can log its:
-- url, methode, query, body sent with the [*callRequestLogging*](#### callRequestLogging) method.
-- status, body, error received with the [*endRequestLogging*](#### endRequestLogging) method.
+- url, methode, query, body sent with the [*callRequestLogging*](#callrequestlogging) method.
+- status, body, error received with the [*endRequestLogging*](#endrequestlogging) method.
 
 If the body response is an object, array or string it will be saved in your log content.
 
@@ -152,7 +220,7 @@ If the body response is in a html format, it will be saved in a html file under 
 You'll have a block of log with the following settings:
 - logblock: [{url}-{method}-{uid}]
 - context: *REQUEST*
-- type: 2 (REST_CLIENT = 2, click [here](### Log types))
+- type: 2 (REST_CLIENT = 2, click [here](#log-types))
 
 #### callRequestLogging
 ```
@@ -178,9 +246,19 @@ endRequestLogging(url, method, err, httpResponse, body, api, json )
 ```
 const request = require('request');
 let url = "http://ip.jsontest.com/ ";
-logger.callRequestLogging(url, 'GET', {}, true);
+logger.Log.callRequestLogging(url, 'GET', {}, true);
 request.get(url, (err, httpResponse, body) => {
-  logger.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+  logger.Log.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
+});
+```
+In a logblock:
+```
+const request = require('request');
+let url = "http://ip.jsontest.com/ ";
+let logblock = new logger.Logblock();
+logblock.callRequestLogging(url, 'GET', {}, true);
+request.get(url, (err, httpResponse, body) => {
+  logblock.endRequestLogging(url, 'get', err, httpResponse, body, true, false);
 });
 ```
 ### Websocket logging
@@ -199,7 +277,7 @@ io.on('connection', (socket) => {
 You'll have a block of log with the following settings:
 - logblock: [{eventName}-{uid}]
 - context: *WEBSOCKET*
-- type: 3 (WS = 3, click [here](### Log types))
+- type: 3 (WS = 3, click [here](#log-types))
 
 ### Mail Logging
 You can receive mails from a certain level that you specify in your env var *MAIL_LOG_LEVEL*.
@@ -215,6 +293,7 @@ Set your mail settings in the init method as follow:
 - subject: Your mail subject
 - html: set to true if you use html in your formatter, false by default.
 - formatter: a method to format your email
+
 ```
   const formatter = (data) => {
     let msg = util.format(data.message, ...data.splat);
@@ -289,7 +368,4 @@ npm run standalone [PORT] [MONGO_DB_STRING] [LOG_PREFIX] [COLLECTION_NAME]
 
 
 # Todos:
-  - activate/desactivate Logging
-  - fix bash colors
-  - fix powerShell magenta color
-  - pass shortId as optional to request logging.
+  - Create a logging interface

@@ -8,13 +8,14 @@
 
 const os = require('os');
 const util = require('util');
-const ansi = require('chalk');
 const moment = require('moment');
-const { LEVEL, MESSAGE } = require('triple-beam');
+const { LEVEL } = require('triple-beam');
 const TransportStream = require('winston-transport');
 const helpers = require('./helpers');
 const {colors} = require('../helpers/levelsSettings');
 const _ = require('lodash');
+const ansi = require('../helpers/ansi.js');
+
 //
 // ### function Console (options)
 // #### @options {Object} Options for this instance.
@@ -22,39 +23,39 @@ const _ = require('lodash');
 // for persisting log messages and metadata to a terminal or TTY.
 //
 var Console = module.exports = function (options) {
-  options = options || {};
-  TransportStream.call(this, options);
-  this.stderrLevels = getStderrLevels(options.stderrLevels, options.debugStdout);
-  this.eol = os.EOL;
+	options = options || {};
+	TransportStream.call(this, options);
+	this.stderrLevels = getStderrLevels(options.stderrLevels, options.debugStdout);
+	this.eol = os.EOL;
 
-  //
-  // Convert stderrLevels into an Object for faster key-lookup times than an Array.
-  //
-  // For backwards compatibility, stderrLevels defaults to ['error', 'debug']
-  // or ['error'] depending on whether options.debugStdout is true.
-  //
-  function getStderrLevels(levels, debugStdout) {
-    var defaultMsg = 'Cannot have non-string elements in stderrLevels Array';
-    if (debugStdout) {
-      if (levels) {
-        //
-        // Don't allow setting both debugStdout and stderrLevels together,
-        // since this could cause behaviour a programmer might not expect.
-        //
-        throw new Error('Cannot set debugStdout and stderrLevels together');
-      }
+	//
+	// Convert stderrLevels into an Object for faster key-lookup times than an Array.
+	//
+	// For backwards compatibility, stderrLevels defaults to ['error', 'debug']
+	// or ['error'] depending on whether options.debugStdout is true.
+	//
+	function getStderrLevels(levels, debugStdout) {
+		var defaultMsg = 'Cannot have non-string elements in stderrLevels Array';
+		if (debugStdout) {
+			if (levels) {
+				//
+				// Don't allow setting both debugStdout and stderrLevels together,
+				// since this could cause behaviour a programmer might not expect.
+				//
+				throw new Error('Cannot set debugStdout and stderrLevels together');
+			}
 
-      return stringArrayToSet(['error'], defaultMsg);
-    }
+			return stringArrayToSet(['error'], defaultMsg);
+		}
 
-    if (!levels) {
-      return stringArrayToSet(['error', 'debug'], defaultMsg);
-    } else if (!(Array.isArray(levels))) {
-      throw new Error('Cannot set stderrLevels to type other than Array');
-    }
+		if (!levels) {
+			return stringArrayToSet(['error', 'debug'], defaultMsg);
+		} else if (!(Array.isArray(levels))) {
+			throw new Error('Cannot set stderrLevels to type other than Array');
+		}
 
-    return stringArrayToSet(levels, defaultMsg);
-  }
+		return stringArrayToSet(levels, defaultMsg);
+	}
 };
 
 //
@@ -73,50 +74,45 @@ Console.prototype.name = 'console';
 // Core logging method exposed to Winston.
 //
 Console.prototype.log = function (info, callback) {
-  var self = this;
+	var self = this;
 
-  let meta;
-  if (info.splat) {
-    meta = Object.assign({}, info.meta);
-  } else {
-    meta = Object.assign({}, info);
-    delete meta.message;
-    delete meta.level;
-  }
-  if(!meta.context){
-    throw new Error('Each log should have a context. log: ' + JSON.stringify(info));
-  }
-  if(!meta.logblock){
-    throw new Error('Each log should be part of a logblock.');
-  }
+	let meta;
+	if (info.splat) {
+		meta = Object.assign({}, info.meta);
+	} else {
+		meta = Object.assign({}, info);
+		delete meta.message;
+		delete meta.level;
+	}
+	meta.context = meta.context || 'GENERAL';
 
-  setImmediate(function () {
-    self.emit('logged', info);
-  });
+	setImmediate(function () {
+		self.emit('logged', info);
+	});
 
-  let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
-  delete meta.logblock;
-  delete meta.context;
-  delete meta.noMongoLog;
-  delete meta.type;
-  delete meta.splat;
-  let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';
-  message += ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
-  message += info.message.replace(/^\s+|\s+$/g, '');
+	let extras = helpers.prepareMetaData({context: meta.context, logblock: meta.logblock});
+	delete meta.logblock;
+	delete meta.context;
+	delete meta.noMongoLog;
+	delete meta.type;
+	delete meta.splat;
+	let message = moment().format('YYYY/MM/DD_HH:mm:ss') + ' ';
+	message += ansi[colors[info[LEVEL]]](info[LEVEL]) + ': ';
+	message += info.message.replace(/^\s+|\s+$/g, '');
 
-  let metaObject = helpers.prepareMetaData(meta);
-  message += _.isEmpty(metaObject) ? '': '\n';
-  message += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
-  message += _.isEmpty(extras) ? '': '\n';
-  message += _.isEmpty(extras) ? '': JSON.stringify(extras);
+	let metaObject = helpers.prepareMetaData(meta);
+	message += _.isEmpty(metaObject) ? '': '\n';
+	message += _.isEmpty(metaObject) ? '': JSON.stringify(metaObject);
+	message += _.isEmpty(extras) ? '': '\n';
+	message += _.isEmpty(extras) ? '': JSON.stringify(extras);
 
-  if (this.stderrLevels[info[LEVEL]]) {
-    process.stderr.write(message + this.eol + this.eol);
+	if (this.stderrLevels[info[LEVEL]]) {
+		process.stderr.write(message + this.eol + this.eol);
     if (callback) { callback(); } // eslint-disable-line
-    return;
-  }
+		return;
+	}
 
-  process.stdout.write(message + this.eol + this.eol);
+	process.stdout.write(message + this.eol + this.eol);
   if (callback) { callback(); } // eslint-disable-line
 };
 
@@ -127,11 +123,11 @@ Console.prototype.log = function (info, callback) {
 // Returns a Set-like object with strArray's elements as keys (each with the value true).
 //
 function stringArrayToSet(strArray, errMsg) {
-  errMsg = errMsg || 'Cannot make set from Array with non-string elements';
+	errMsg = errMsg || 'Cannot make set from Array with non-string elements';
 
-  return strArray.reduce(function (set, el) {
-    if (typeof el !== 'string') { throw new Error(errMsg); }
-    set[el] = true;
-    return set;
-  }, {});
+	return strArray.reduce(function (set, el) {
+		if (typeof el !== 'string') { throw new Error(errMsg); }
+		set[el] = true;
+		return set;
+	}, {});
 }
