@@ -37,7 +37,7 @@ class Logblock extends Log {
 		if (name) {
 			this.name = `${name}-${logblockId}`;
 		} else {
-			let strace = StackTrace.get()[2];
+			let strace = StackTrace.get()[1];
 			let logblockName = strace.getMethodName() || strace.getFunctionName() || strace.getFileName();
 			this.name = `${logblockName}-${logblockId}`;
 		}
