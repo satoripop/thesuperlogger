@@ -88,16 +88,14 @@ class Logger {
 
 			let dbSettings = this.options.dbSettings;
 
-			const mongoTransport = new winstonMongo({
+			const mongoTransport = new winstonMongo(Object.assign({}, dbSettings, {
 				level: this.dbLevel,
-				db: dbSettings.db,
-				options: dbSettings.options,
 				keepAlive: 1000,
 				safe: true,
 				nativeParser: true,
 				decolorize: true,
 				handleExceptions: false,
-			});
+			}));
 			this.dbTransport = mongoTransport;
 
 			transports.push(mongoTransport);
