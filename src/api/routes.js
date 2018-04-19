@@ -25,7 +25,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 		let validFrom = from && moment(from).isValid() &&  moment(until).isAfter(moment(from));
 		let _from = validFrom ? moment(from).toDate() : moment(until).subtract(30, 'days').toDate();
 
-		order = order || 1;
+		order = order || -1;
 
 		page = page || 0;
 		const pageSize = 10;
