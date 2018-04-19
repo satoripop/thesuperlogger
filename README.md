@@ -357,8 +357,11 @@ The params you can pass on query to filter your logs:
 - logblock
 - type
 - level
-
-The logs are paginated starting with page 0.
+- source
+- from: date following this format 2018-03-20T08:21:32.152Z
+- until: date following this format 2018-03-20T08:21:32.152Z
+- order: -1 as desc or 1 as asc. -1 is the default value
+- page: The logs are paginated starting with page 0.
 
 In case your app keeps crashing and you need to reach the log api you can run the script **standalone** to launch a standalone log api:
 ```
