@@ -29,17 +29,17 @@ describe('logblock', () => {
 	});
 
 	describe('constructor', () => {
-		it('should accept no params', () => {
+		it('should be able to accept no params', () => {
 			let logblock, strace;
 			expect(() => {
-				strace = StackTrace.get()[1];
+				strace = StackTrace.get()[0];
 				logblock = new logger.Logblock();
 			}).to.not.throw();
 			let logblockName = strace.getMethodName() || strace.getFunctionName() || strace.getFileName();
 			expect(logblock.name.includes(logblockName)).to.be.true;
 		});
 
-		it('should accept string params', () => {
+		it('should be able to accept string params', () => {
 			let logblock;
 			let logblockName = 'test-logblock';
 			expect(() => {
@@ -48,7 +48,7 @@ describe('logblock', () => {
 			expect(logblock.name.includes(logblockName)).to.be.true;
 		});
 
-		it('should accept object params', () => {
+		it('should able to accept object params', () => {
 			let logblock;
 			let logblockName = 'test-logblock';
 			expect(() => {
