@@ -307,6 +307,10 @@ MongoDB.prototype.query = function(opt_options, cb) {
 	if(options.type){
 		Object.assign(query, {type: options.type});
 	}
+	// filter by source
+	if (options.source) {
+		Object.assign(query, {source: { $regex: `.*${options.source}.*` }});
+	}
 	// filter by level
 	if(options.level){
 		Object.assign(query, {level: options.level});

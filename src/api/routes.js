@@ -17,7 +17,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 	// Main route
 	const mainRoute = `${routesPrefix}`;
 	app.get(mainRoute, (req, res) => {
-		let { context, logblock, type, level, page, until, from, order } = req.query;
+		let { context, logblock, type, level, page, until, from, order, source } = req.query;
 
 		let validUntil = until && moment(until).isValid();
 		let _until = validUntil ? moment(until).toDate() : moment().toDate();
@@ -40,8 +40,9 @@ module.exports.routes = (logger, app, routesPrefix) => {
 			logblock,
 			type,
 			level,
+			source,
 			order: parseInt(order) >= 0 ? 'asc' : 'desc',
-			fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level'],
+			fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level', 'source'],
 		};
 		logger._listLog(options)
 			.then(results => {
