@@ -48,7 +48,7 @@ describe('api routes', () => {
 			until: moment().toDate(),
 			limit,
 			start,
-			order: 'asc',
+			order: 'desc',
 			fields,
 		};
 		logger._listLog(options)

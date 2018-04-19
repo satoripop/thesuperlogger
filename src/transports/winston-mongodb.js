@@ -295,9 +295,13 @@ MongoDB.prototype.query = function(opt_options, cb) {
 	let query = {
 		timestamp: {$gte: options.from, $lte: options.until},
 	};
+	// filter by content
+	if(options.content){
+		Object.assign(query, {content: {$regex : `.*${options.content}.*`}});
+	}
 	// filter by context
-	if(options.context){
-		Object.assign(query, {context: {$regex : `.*${options.context}.*`}});
+	if (options.context) {
+		Object.assign(query, { context: { $regex: `.*${options.context}.*` } });
 	}
 	// filter by logblock
 	if(options.logblock){
@@ -306,6 +310,10 @@ MongoDB.prototype.query = function(opt_options, cb) {
 	// filter by type
 	if(options.type){
 		Object.assign(query, {type: options.type});
+	}
+	// filter by source
+	if (options.source) {
+		Object.assign(query, {source: { $regex: `.*${options.source}.*` }});
 	}
 	// filter by level
 	if(options.level){

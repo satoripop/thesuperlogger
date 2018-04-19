@@ -17,7 +17,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 	// Main route
 	const mainRoute = `${routesPrefix}`;
 	app.get(mainRoute, (req, res) => {
-		let { context, logblock, type, level, page, until, from, order } = req.query;
+		let { context, content, logblock, type, level, page, until, from, order, source } = req.query;
 
 		let validUntil = until && moment(until).isValid();
 		let _until = validUntil ? moment(until).toDate() : moment().toDate();
@@ -25,7 +25,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 		let validFrom = from && moment(from).isValid() &&  moment(until).isAfter(moment(from));
 		let _from = validFrom ? moment(from).toDate() : moment(until).subtract(30, 'days').toDate();
 
-		order = order || 1;
+		order = order || -1;
 
 		page = page || 0;
 		const pageSize = 10;
@@ -36,12 +36,14 @@ module.exports.routes = (logger, app, routesPrefix) => {
 			until: _until,
 			limit,
 			start,
+			content,
 			context,
 			logblock,
 			type,
 			level,
+			source,
 			order: parseInt(order) >= 0 ? 'asc' : 'desc',
-			fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level'],
+			fields: ['content', 'timestamp', 'context', 'logblock', 'type', 'level', 'source'],
 		};
 		logger._listLog(options)
 			.then(results => {
@@ -55,7 +57,7 @@ module.exports.routes = (logger, app, routesPrefix) => {
 	// Grouped by logblock route
 	const groupedRoute = `${routesPrefix}/by-block`;
 	app.get(groupedRoute, (req, res) => {
-		let { context, logblock, type, level, page } = req.query;
+		let { content, context, logblock, type, level, page, source } = req.query;
 		page = page || 0;
 		const pageSize = 10;
 		const start = page * pageSize;
@@ -65,12 +67,14 @@ module.exports.routes = (logger, app, routesPrefix) => {
 			until: new Date(),
 			limit,
 			start,
+			content,
 			context,
 			logblock,
 			type,
 			level,
+			source,
 			order: 'desc',
-			fields: ['content', 'timestamp', 'context', 'type', 'level'],
+			fields: ['content', 'timestamp', 'context', 'type', 'level', 'source'],
 			group: 'logblock',
 		};
 		logger._listLog(options)
