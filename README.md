@@ -4,8 +4,6 @@
 
 An NPM logging module that has an API to list and search logs for Node JS applications  plus a real time logging by email and on the console. The API endpoints can be used for the monitoring system (will be developed on a later stage).
 
-You can check the blueprint docs [here](https://docs.google.com/document/d/14yhGJDdrpyrpfUhlv2IQhqKwPftO5VA_YBvWIHJoFkY/edit?usp=sharing).
-
 ----------
 ### Table of contents
 
@@ -42,7 +40,7 @@ install mongo and create a database. [not required]
 
 Install all npm packages.
 ```
-npm install
+npm install thesuperlogger
 ```
 ### SET env
 you have to add `LOG_LEVEL` & `DB_LOG_LEVEL` & optionaly `MAIL_LOG_LEVEL` to your environment.
