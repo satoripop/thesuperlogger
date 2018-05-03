@@ -34,3 +34,5 @@ src/\.DS_Store
 package-lock\.json
 
 \.DS_Store
+
+\index.js
