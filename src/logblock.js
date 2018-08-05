@@ -34,7 +34,8 @@ class Logblock extends Log {
 			}
 		}
 		let logblockId = shortid.generate();
-		if (name) {
+		if (!_.isEmpty(name)) {
+			name = name.replace('module.exports.', '');
 			this.name = `${name}-${logblockId}`;
 		} else {
 			let strace = StackTrace.get()[1];
