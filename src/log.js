@@ -146,11 +146,13 @@ class Log {
 			this.logger.error('Request fail on: ', logMetaError);
 		} else {
 			//log request call
-			let level = levelFromResStatus(httpResponse.statusCode);
+			let statusCode = (httpResponse && httpResponse.statusCode) ?
+				httpResponse.statusCode : 500;
+			let level = levelFromResStatus(statusCode);
 			let msg = api ? '%s API Response %s ' : '%s Response %s ';
-			let status = (err || httpResponse.statusCode >= 300 || httpResponse.statusCode < 200) ?
-				ansi.red.bold(`[Error] ${httpResponse.statusCode}`) :
-				ansi.green.bold(`[Success] ${httpResponse.statusCode}`);
+			let status = (err || statusCode >= 300 || statusCode < 200) ?
+				ansi.red.bold(`[Error] ${statusCode}`) :
+				ansi.green.bold(`[Success] ${statusCode}`);
 			this.logger.log(level, msg, status, ansi.blue(`${url}: ${method}`), logMeta);
 			//log file containing html body
 			if (isHtml(body)) {

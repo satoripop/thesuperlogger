@@ -202,7 +202,6 @@ class Logger {
    * a Middleware for express to log called routes in a morgan style logging
    */
 	expressLogging() {
-		let level = levelFromStatus();
 		const self = this;
 		return (req, res, next) => {
 			let currentUrl = req.originalUrl || req.url,
@@ -249,7 +248,7 @@ class Logger {
 				let msg = ansi.grey(`${req.method} ${req.url}`) +
           ansi[statusColor](` ${res.statusCode} `) +
           ansi.grey(`${res.responseTime}ms`);
-				self.logger.log(level(req, res), msg, logMeta);
+				self.logger.log(levelFromStatus(req), msg, logMeta);
 				//log response body
 				if (!_.isEmpty(res.body)) {
 					let logMetaResponseBody = Object.assign({}, logMeta, res.body);

@@ -30,20 +30,18 @@ module.exports.colors = {
 	emergency: 'red',
 };
 
-module.exports.levelFromStatus = () =>{
-	return (req, res) => {
-		var level = '';
-		if (res.statusCode >= 100) {
-			level = 'debug';
-		}
-		if (res.statusCode >= 400) {
-			level = 'warning';
-		}
-		if (res.statusCode >= 500) {
-			level = 'error';
-		}
-		return level;
-	};
+module.exports.levelFromStatus = (res) =>{
+	var level = '';
+	if (res.statusCode >= 100) {
+		level = 'debug';
+	}
+	if (res.statusCode >= 400) {
+		level = 'warning';
+	}
+	if (res.statusCode >= 500) {
+		level = 'error';
+	}
+	return level;
 };
 
 
