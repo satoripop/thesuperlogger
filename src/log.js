@@ -88,10 +88,16 @@ class Log {
 
 		//log request query
 		let queryString = (url.split('?'))[1];
-		let query = queryString ? JSON.parse(
-			'{"' + queryString.replace(/&/g, '","').replace(/=/g,'":"') + '"}',
-			(key, value) => key===''?value:decodeURIComponent(value)
-		):{};
+		const getQueryParameters = (str) => {
+			str = str.replace(/(^&)|(&$)/g, '');
+			return str.replace(/(^\?)/, '')
+				.split('&')
+				.map(function (n) {
+					return n = n.split('='), this[n[0]] = n[1], this
+				}.bind({}))[0];
+		};
+
+		let query = queryString ? getQueryParameters(queryString) : {};
 		if(!_.isEmpty(query)){
 			let logMetaQuery = Object.assign({}, logMeta, {query});
 			this.logger.info('Query params: ', logMetaQuery);
