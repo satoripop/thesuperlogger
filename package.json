@@ -1,6 +1,6 @@
 {
   "name": "thesuperlogger",
-  "version": "1.0.9",
+  "version": "1.0.11",
   "description": "An NPM logging module that has an API to list and search logs for Node JS applications plus a real time logging on the console and by email. The API endpoints can be used for the monitoring system (will be developed on a later stage).",
   "main": "./src/logger.js",
   "scripts": {
