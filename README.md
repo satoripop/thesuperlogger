@@ -126,13 +126,22 @@ Object.assign(objectError, {
   source: 'CLIENT_SIDE'
 })
 logger.Log.error(textError, value, objectError);
-//error: hello world! {x: 2} {context: 'MY_CONTEXT', source: 'CLIENT_SIDE'}
+//error: hello world! 
+//{x: 2} 
+//{context: 'MY_CONTEXT', source: 'CLIENT_SIDE'}
 
 logger.Log.info('Yo %s!', 'superman');
 //info: Yo superman!
 
 logger.Log.emergency(textError, value, {z: 3});
-//emergency: hello world! {x: 2} {context: 'GENERAL'}
+//emergency: hello world! 
+//{x: 2} 
+//{context: 'GENERAL'}
+
+logger.Log.emergency("error object on content %j", objectError, {z: 3});
+//emergency: error object on content {"x":2}
+//{"z":3}
+//{"context":"GENERAL"}
 ```
 
 ### Logblock log

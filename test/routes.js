@@ -41,12 +41,11 @@ describe('api routes', () => {
 		const page = 0;
 		const pageSize = 10;
 		const start = page * pageSize;
-		const limit = start + pageSize;
 		let fields = ['content', 'timestamp', 'context', 'logblock', 'type', 'level'];
 		const options = {
 			from: moment().subtract(30, 'days').toDate(),
 			until: moment().toDate(),
-			limit,
+			limit: pageSize,
 			start,
 			order: 'desc',
 			fields,
@@ -75,12 +74,11 @@ describe('api routes', () => {
 		const page = 0;
 		const pageSize = 10;
 		const start = page * pageSize;
-		const limit = start + pageSize;
 		let fields = ['content', 'timestamp', 'context', 'type', 'level'];
 		const options = {
 			from: moment().subtract(30, 'days').toDate(),
 			until: moment().toDate(),
-			limit,
+			limit: pageSize,
 			start,
 			order: 'asc',
 			fields,
