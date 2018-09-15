@@ -115,12 +115,12 @@ let MongoDB = exports.MongoDB = function(options) {
 	this._opQueue = [];
 	let self = this;
 
-	function setupDatabaseAndEmptyQueue(db) {
-		return createCollection(db).then(db=>{
+	function setupDatabaseAndEmptyQueue(client) {
+		return createCollection(client.db()).then(db=>{
 			self.logDb = db;
 			processOpQueue();
 		}, err=>{
-			db.close();
+			client.close();
 			console.error('super-logger(mongodb), initialization error: ', err);
 		});
 	}
@@ -153,11 +153,16 @@ let MongoDB = exports.MongoDB = function(options) {
 			})
 				.catch(err => {console.error('super-logger(mongodb), fail to create index: ', err);});
 		})
-			.then(()=>db)
-			.catch(err => {console.error('super-logger(mongodb), fail to create collection: ', err);});
+			.then(()=>{
+				return db;
+			})
+			.catch(err => {
+				console.error('super-logger(mongodb), fail to create collection: ', err);
+			});
 	}
 	function connectToDatabase(logger) {
-		return mongodb.MongoClient.connect(logger.db, logger.options
+		return mongodb.MongoClient.connect(
+			logger.db, Object.assign(logger.options, { useNewUrlParser: true})
 		).then(setupDatabaseAndEmptyQueue, err=>{
 			console.error('super-logger(mongodb): error initialising logger', err);
 		});
