@@ -248,7 +248,7 @@ class Logger {
 				let msg = ansi.grey(`${req.method} ${req.url}`) +
           ansi[statusColor](` ${res.statusCode} `) +
           ansi.grey(`${res.responseTime}ms`);
-				self.logger.log(levelFromStatus(req), msg, logMeta);
+				self.logger.log(levelFromStatus(res), msg, logMeta);
 				//log response body
 				if (!_.isEmpty(res.body)) {
 					let logMetaResponseBody = Object.assign({}, logMeta, res.body);
