@@ -30,11 +30,10 @@ module.exports.routes = (logger, app, routesPrefix) => {
 		page = page || 0;
 		const pageSize = 10;
 		const start = page * pageSize;
-		const limit = start + pageSize;
 		const options = {
 			from: _from,
 			until: _until,
-			limit,
+			limit: pageSize,
 			start,
 			content,
 			context,
@@ -61,11 +60,10 @@ module.exports.routes = (logger, app, routesPrefix) => {
 		page = page || 0;
 		const pageSize = 10;
 		const start = page * pageSize;
-		const limit = start + pageSize;
 		const options = {
 			from: new Date() - (30 * 24 * 60 * 60 * 1000),
 			until: new Date(),
-			limit,
+			limit: pageSize,
 			start,
 			content,
 			context,
